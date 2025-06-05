@@ -1,0 +1,15 @@
+view verificationsByShop($shopId: Number) {
+  verifications {
+    id
+    updatedAt
+    order {
+      name
+    }
+    customer {
+      email
+    }
+    [
+      where shopId == $shopId
+    ]
+  }
+}

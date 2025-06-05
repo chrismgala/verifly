@@ -1,0 +1,21 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "9a4205afa7a3d399df6e7c9992a1bfca"
+name = "Verifly"
+handle = "verifly"
+application_url = "https://verifly.gadget.app/api/shopify/install-or-render"
+embedded = true
+
+[build]
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-01"
+
+[auth]
+redirect_urls = [
+  "https://verifly.gadget.app/api/connections/auth/shopify/callback"
+]
+
+[pos]
+embedded = false

@@ -1,0 +1,23 @@
+.gadgetLogo {
+  margin: 14px auto;
+  height: 44px;
+}
+
+.Polaris-IndexFilters__ActionWrap {
+  display: none;
+}
+
+.Polaris-Grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.Polaris-CalloutCard__Image {
+  width: 12rem;
+}
+
+.Polaris-Box {
+  min-height: initial;
+}

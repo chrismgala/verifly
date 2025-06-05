@@ -1,0 +1,3 @@
+filter ($session: Session) on Verification [
+  where shopId == $session.shopId
+]
