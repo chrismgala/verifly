@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useOutletContext, Link } from "react-router";
 import { useFetch } from "@gadgetinc/react";
-import { differenceInDays } from "date-fns";
 
 import {
   Page,
@@ -116,17 +115,11 @@ export const VerificationsPage = () => {
                 position={index}
               >
                 <IndexTable.Cell>
-                  {differenceInDays(new Date(), new Date(updatedAt)) >= 2 ? (
+                  <Link to={`/verification/${id}/${sessionId}`}>
                     <Text variant="bodyMd" fontWeight="bold" as="span">
                       {orderName}
                     </Text>
-                  ) : (
-                    <Link to={`/verification/${id}/${sessionId}`}>
-                      <Text variant="bodyMd" fontWeight="bold" as="span">
-                        {orderName}
-                      </Text>
-                    </Link>
-                  )}
+                  </Link>
                 </IndexTable.Cell>
 
                 <IndexTable.Cell>

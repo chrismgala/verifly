@@ -50,11 +50,12 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const fileUrlFront = fileLinkFront.url;
     const fileUrlBack = fileLinkBack.url;
 
-    const { created, last_verification_report } = stripeVerificationSession;
+    const { last_verification_report } = stripeVerificationSession;
 
     return reply.code(200).send({
       lastVerificationReport: last_verification_report,
-      files: [fileUrlFront, fileUrlBack]
+      files: [fileUrlFront, fileUrlBack],
+      internalVerification: verification
      });
   } catch (error) {
     logger.error({ 
