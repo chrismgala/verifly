@@ -181,58 +181,6 @@ export const onSuccess = async ({
       error: error.message
     });
   }
-
-  // Send onboarding email
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const { data, error } = await resend.emails.send({
-      from: 'Chris <chris@verifly.shop>',
-      to: record.email,
-      subject: "Welcome to Verifly!",
-      html: `
-        <p>Hey there!</p>
-        
-        <p>
-          My name is Chris and I'm the founder of Verifly! I promise this is not the start of a series of marketing emails.
-        </p>
-        
-        <p>
-          In order to get started, make sure you complete the following:
-        </p>
-
-        <ol>
-          <li>Activate your trial in Shopify Admin to start using the app. Your trial will last 7 days and can be cancelled at any time.</li>
-          <li>Turn on automated ID verifications by going to the Settings page in the Verifly app.</li>
-          <li>Test the verification process by creating a fake order in Shopify Admin. Use your email for the customer details and set an extremely high trigger price in the Verifly Settings.</li>
-        </ol>
-
-        <p>
-          If you have any questions, feel free to reply to this email or <a href="https://cal.com/verifly">schedule a call</a>.
-        </p>
-
-        <p>
-          Kindly,
-          <br/>
-          Chris
-        </p>
-      `
-    });
-
-    if (error) {
-      logger.error({ error }, "[App Install] - Error sending onboarding email");
-      return;
-    }
-
-    logger.info({ emailId: data?.id }, "[App Install] - Onboarding email sent successfully");
-
-  } catch (error) {
-    logger.error({
-      message: "[App Install] - Failed to send onboarding email",
-      shopId: record.id,
-      shopDomain: record.domain,
-      error: error.message
-    });
-  }
 };
 
 /** @type { ActionOptions } */
