@@ -25,6 +25,7 @@ import { BillingPage } from "../routes/billing";
 import { VerificationsPage } from "../routes/verifications";
 import { VerificationPage } from "../routes/verification";
 import { SettingsPage } from "../routes/settings";
+import { TestPage } from "../routes/test";
 
 import { FullPageError } from "../components/FullPageError";
 import { FullPageSpinner } from "../components/FullPageSpinner";
@@ -59,6 +60,7 @@ function App() {
         <Route index element={<IndexPage />} />
         <Route path="verifications" element={<VerificationsPage />} />
         <Route path="verification/:id/:sessionId" element={<VerificationPage />} />
+        <Route path="test" element={<TestPage />} />
         <Route path="billing" element={<BillingPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<Error404 />} />
@@ -119,6 +121,7 @@ function EmbeddedApp() {
       setupComplete: true,
       confirmationUrl: true,
       verificationsEnabled: true,
+      testVerificationSent: true,
       triggerPrice: true,
       veriflyPlan: {
         id: true,
@@ -149,6 +152,9 @@ function EmbeddedApp() {
         </Link>
         <Link to="/verifications" rel="verifications">
           Verifications
+        </Link>
+        <Link to="/test" rel="test-verification">
+          Test
         </Link>
         <Link to="/billing" rel="billing">
           Billing

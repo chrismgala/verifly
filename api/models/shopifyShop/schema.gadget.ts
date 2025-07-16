@@ -28,6 +28,11 @@ export const schema: GadgetModel = {
       default: false,
       storageKey: "GhfET8UxE5RX",
     },
+    testVerificationSent: {
+      type: "boolean",
+      default: false,
+      storageKey: "Y4w_DqbwMRng",
+    },
     trialStartedAt: {
       type: "dateTime",
       includeTime: true,
