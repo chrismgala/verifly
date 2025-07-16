@@ -73,7 +73,7 @@ export const VerificationsPage = () => {
   return (
     <Page
       title="Verifications"
-      subtitle="Only verifications from the last 48 hours can be overridden"
+      subtitle="Click on the order number to view the customer's verification details"
       backAction={{
         content: "Shop Information",
         onAction: () => navigate("/"),

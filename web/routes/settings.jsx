@@ -17,11 +17,13 @@ import { Knob } from "../components/Knob/Knob";
 
 export const SettingsPage = () => {
   const navigate = useNavigate();
+  const shopify = useAppBridge();
   const { shopId, shop } = useOutletContext();
 
   const isTrialActivated = shop?.confirmationUrl && shop?.veriflyPlan;
 
-  const shopify = useAppBridge();
+  const [verificationsEnabled, setVerificationsEnabled] = useState(shop?.verificationsEnabled);
+  const [triggerPrice, setTriggerPrice] = useState(shop?.triggerPrice);
 
   // Update settings
   const [{ data, fetching, error }, send] = useFetch(`/settings/${shopId}`, { 
@@ -30,9 +32,6 @@ export const SettingsPage = () => {
       "content-type": "application/json",
     }
   });
-
-  const [verificationsEnabled, setVerificationsEnabled] = useState(shop?.verificationsEnabled);
-  const [triggerPrice, setTriggerPrice] = useState(shop?.triggerPrice);
 
   useEffect(() => {
     async function updateSettings() {

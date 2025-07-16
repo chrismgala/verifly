@@ -120,7 +120,7 @@ export const VerificationPage = () => {
         title="Verification"
         titleMetadata={displayVerificationBadge(currentStatus)}
         primaryAction={!isVerified ? { 
-          content: 'Override', 
+          content: 'Approve', 
           onAction: overrideVerification,
           loading: isLoading
         } : null}

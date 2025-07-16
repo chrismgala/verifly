@@ -56,18 +56,6 @@ export const IndexPage = () => {
     <Page title="Dashboard">
       <Layout>
         <Layout.Section>
-          {showGuide && (
-            <SetupGuide
-              onDismiss={() => {
-                setShowGuide(false);
-                setItems(setupGuideItems);
-              }}
-              items={setupGuideItems}
-            />
-          )}
-        </Layout.Section>
-
-        <Layout.Section>
           <CalloutCard
             title={`${shop?.shopOwner ?? "Hello"}, welcome to Verifly!`}
             illustration={biometricsImageUrl}
@@ -78,6 +66,18 @@ export const IndexPage = () => {
           >
             <p>Verifly has facilitated <strong>{shop?.monthlyVerificationCount} verifications</strong> in the last 30 days!</p>
           </CalloutCard>
+        </Layout.Section>
+
+        <Layout.Section>
+          {showGuide && (
+            <SetupGuide
+              onDismiss={() => {
+                setShowGuide(false);
+                setItems(setupGuideItems);
+              }}
+              items={setupGuideItems}
+            />
+          )}
         </Layout.Section>
       </Layout>
     </Page>
