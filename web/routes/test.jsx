@@ -6,7 +6,7 @@ import { api } from '../api';
 export function TestPage() {
   const { shopId, shop } = useSession();
 
-  const isTrialActivated = /* shop?.confirmationUrl && shop?.veriflyPlan; */ true;
+  const isTrialActivated = shop?.confirmationUrl && shop?.veriflyPlan;
 
   const [testEmail, setTestEmail] = useState('');
   const [testVerificationSent, setTestVerificationSent] = useState(shop?.testVerificationSent);

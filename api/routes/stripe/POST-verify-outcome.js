@@ -75,6 +75,36 @@ const route = async ({ request, reply, api, logger, connections }) => {
     return reply.code(500).send({error: `DB error: ${error.message}`});
   }
 
+  try {
+    const shopify = connections.shopify.current;
+    if (!shopify) {
+      throw new Error("[App Install] - Missing Shopify connection");
+    }
+
+    const result = await shopify.graphql(
+      `mutation ($id: ID!, $tags: [String!]!) {
+        tagsAdd(id: $id, tags: $tags) {
+          node {
+            id
+          }
+          userErrors {
+            message
+          }
+        }
+      }`,
+      {
+        id: `gid://shopify/Customer/${customerId}`,
+        tags: ["Verifly Verified"]
+      }
+    );
+
+    logger.info({ result }, '[VerificationOutcome - Verified] Customer tags updated successfully');
+
+  } catch (error) {
+    logger.error({ error, customerId }, '[VerificationOutcome - Verified] Customer tags update failed');
+    return reply.code(500).send({error: `Customer tags update failed: ${error.message}`});
+  }
+
   // Successfully constructed event
   switch (event.type) {
     // Success
