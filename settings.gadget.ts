@@ -8,13 +8,20 @@ export const settings: GadgetSettings = {
       shopify: {
         apiVersion: "2025-01",
         enabledModels: [
+          "shopifyApp",
           "shopifyAppInstallation",
           "shopifyAppSubscription",
           "shopifyAppUsageRecord",
           "shopifyDomain",
+          "shopifyProduct",
         ],
         type: "partner",
-        scopes: ["read_customers", "read_orders"],
+        scopes: [
+          "read_customers",
+          "read_orders",
+          "read_products",
+          "write_orders",
+        ],
       },
     },
   },
