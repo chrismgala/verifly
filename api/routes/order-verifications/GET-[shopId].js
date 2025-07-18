@@ -11,7 +11,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
   const verifications = await api.verification.findMany({
     filter: {
       shopId: {
-        equals: request.params.id
+        equals: request.params.shopId
       }
     }
   });

@@ -202,8 +202,6 @@ export const onSuccess = async ({ trigger, logger, api }) => {
 
       const stripeVerificationUrl = stripeVerificationSession.url;
 
-      logger.debug({ stripeVerificationUrl }, "Stripe verification session generated");
-
       const { data, error } = await resend.emails.send({
         from: 'Verifly <info@verifly.shop>',
         to: customerEmail,

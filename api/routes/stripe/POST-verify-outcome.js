@@ -76,9 +76,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
   }
 
   try {
-    const shopify = connections.shopify.current;
+    const shopify = await connections.shopify.forShopId(shopId);
     if (!shopify) {
-      throw new Error("[App Install] - Missing Shopify connection");
+      throw new Error("[VerificationOutcome - Verified] Missing Shopify connection");
     }
 
     const result = await shopify.graphql(
@@ -93,16 +93,16 @@ const route = async ({ request, reply, api, logger, connections }) => {
         }
       }`,
       {
-        id: `gid://shopify/Customer/${customerId}`,
+        id: `gid://shopify/Order/${orderId}`,
         tags: ["Verifly Verified"]
       }
     );
 
-    logger.info({ result }, '[VerificationOutcome - Verified] Customer tags updated successfully');
+    logger.info({ result }, '[VerificationOutcome - Verified] Order tags updated successfully');
 
   } catch (error) {
-    logger.error({ error, customerId }, '[VerificationOutcome - Verified] Customer tags update failed');
-    return reply.code(500).send({error: `Customer tags update failed: ${error.message}`});
+    logger.error({ error, orderId }, '[VerificationOutcome - Verified] Order tags update failed');
+    return reply.code(500).send({error: `Order tags update failed: ${error.message}`});
   }
 
   // Successfully constructed event

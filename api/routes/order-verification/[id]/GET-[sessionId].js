@@ -8,15 +8,8 @@ import Stripe from 'stripe';
  */
 const route = async ({ request, reply, api, logger, connections }) => {
   const { id, sessionId } = request.params;
-  logger.debug({ id, sessionId }, "Retrieving verification from DB");
 
-  const verification = await api.verification.findOne(id, {
-    filter: {
-      sessionId: {
-        equals: sessionId
-      }
-    }
-  });
+  const verification = await api.verification.findOne(id);
 
   try {
     const stripe = new Stripe(process.env.STRIPE_RESTRICTED_KEY);
