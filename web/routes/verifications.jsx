@@ -28,6 +28,14 @@ export const VerificationsPage = () => {
     json: true
   });
 
+  // Call the resend-verification API
+  const [{ data: resendData, fetching: resendFetching, error: resendError }, resend] = useFetch(`/resend-verification/${shopId}`, { 
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    }
+  });
+
   const verifications = data?.verifications;
 
   // UI state
@@ -37,6 +45,7 @@ export const VerificationsPage = () => {
     // 'Unverified',
   ]);
   const [selected, setSelected] = useState(0);
+  const [isResending, setIsResending] = useState(false);
 
   const tabs = views.map((item, index) => ({
     content: item,
@@ -70,6 +79,43 @@ export const VerificationsPage = () => {
     return <FullPageSpinner />;
   }
 
+  // Bulk action: Resend Email
+  const canResend =
+    selectedResources.length === 1 &&
+    (() => {
+      const selectedIndex = selectedResources[0];
+      const selectedVerification = verifications?.[selectedIndex];
+      return selectedVerification && selectedVerification.customer.status !== 'verified';
+    })();
+
+  const handleResendEmail = async () => {
+    if (selectedResources.length !== 1) return;
+    
+    const selectedIndex = selectedResources[0];
+    const selectedVerification = verifications?.[selectedIndex];
+    
+    if (!selectedVerification) return;
+    
+    setIsResending(true);
+    
+    await resend({
+      body: JSON.stringify({
+        verificationId: selectedVerification.id,
+        verificationSessionId: selectedVerification.sessionId
+      })
+    });
+
+    setIsResending(false);
+  };
+
+  const bulkActions = [
+    {
+      content: 'Resend Email',
+      onAction: handleResendEmail,
+      disabled: !canResend || isResending,
+    },
+  ];
+
   return (
     <Page
       title="Verifications"
@@ -102,6 +148,7 @@ export const VerificationsPage = () => {
             {title: 'Last updated'},
           ]}
           emptyState={emptyStateMarkup}
+          promotedBulkActions={bulkActions}
         >
           {verifications && verifications.map(
             (
@@ -115,11 +162,17 @@ export const VerificationsPage = () => {
                 position={index}
               >
                 <IndexTable.Cell>
-                  <Link to={`/verification/${id}/${sessionId}`}>
-                    <Text variant="bodyMd" fontWeight="bold" as="span">
+                  {customer.status === 'verified' ? (
+                    <Link to={`/verification/${id}/${sessionId}`}>
+                      <Text variant="bodyMd" fontWeight="bold" as="span">
+                        {orderName}
+                      </Text>
+                    </Link>
+                  ) : (
+                    <Text variant="bodyMd" as="span">
                       {orderName}
                     </Text>
-                  </Link>
+                  )}
                 </IndexTable.Cell>
 
                 <IndexTable.Cell>
