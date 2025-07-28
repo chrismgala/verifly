@@ -37,7 +37,7 @@ export const run = async ({ params, trigger, logger, api, connections }) => {
 
   const { monthlyVerificationCount } = shop;
   
-  const totalUsageCost = parseFloat(monthlyVerificationCount * 2);
+  const totalUsageCost = parseFloat(monthlyVerificationCount * 1);
   const currentMonth = new Date().getMonth();
 
   if (totalUsageCost > 0) {

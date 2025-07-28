@@ -1,9 +1,7 @@
 import { RouteHandler } from "gadget-server";
-import Stripe from "stripe";
 import { Resend } from "resend";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { createVerificationSession } from "../../helpers/veriff";
 
 /**
  * Route handler for order verifications
@@ -15,11 +13,6 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const shopId = request.params.shopId;
     const { testEmail } = request.body;
 
-    if (!testEmail) {
-      await reply.code(400).send({ error: "Test email is required in request body" });
-      return;
-    }
-
     logger.info(`Processing test verification for shopId: ${shopId}, email: ${testEmail}`);
 
     // Find the shop by ID
@@ -28,7 +21,8 @@ const route = async ({ request, reply, api, logger, connections }) => {
         id: true,
         name: true,
         domain: true,
-        testVerificationSent: true
+        testVerificationSent: true,
+        shopOwner: true
       }
     });
 
@@ -42,43 +36,36 @@ const route = async ({ request, reply, api, logger, connections }) => {
       return;
     }
 
-    // Create Stripe identity verification session
-    const stripeVerificationSession = await stripe.identity.verificationSessions.create({
-      type: 'document',
-      metadata: {
-        shop_id: shopId,
-        test_verification: 'true',
-        customer_email: testEmail
-      },
+    const veriffVerification = await createVerificationSession({
+      verification: {}
     });
 
-    logger.info(`Created Stripe verification session: ${stripeVerificationSession.id}`);
+    const { verification } = veriffVerification;
+    const { url } = verification;
 
-    // Send email using Resend
-    const stripeVerificationUrl = stripeVerificationSession.url;
-    
-    const emailSubject = `Test Verification - ${shop.name}`;
-    const emailContent = `
-      <h2>Test Identity Verification</h2>
-      <p>This is a test verification for your Verifly setup.</p>
-      
-      <p>Please complete your identity verification by clicking the link below:</p>
-      
-      <a href="${stripeVerificationUrl}" target="_blank">Verify Now</a>
-      
-      <p>
-        This is a test verification sent from ${shop.name} using Verifly.
-      </p>
-    `;
+    logger.info(`Created Veriff verification session: ${verification.id}`);
 
-    await resend.emails.send({
-      from: "Verifly <info@verifly.shop>",
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const { data, error } = await resend.emails.send({
+      from: 'Verifly <info@verifly.shop>',
       to: testEmail,
-      subject: emailSubject,
-      html: emailContent,
+      subject: `[Test] Verify your identity`,
+      react: VerificationEmail({
+        shopName: shop.name,
+        customerName: shop.shopOwner,
+        orderNumber: '#12345',
+        url,
+        test: true
+      })
     });
 
-    logger.info(`Sent test verification email to: ${testEmail}`);
+    if (error) {
+      logger.error({ error }, "Error sending test verification email");
+      return;
+    }
+
+    logger.info({ emailId: data?.id }, "Test verification email sent successfully");
 
     // Update shop's testVerificationSent field to true
     await api.shopifyShop.update(shopId, {
@@ -90,7 +77,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     await reply.send({
       success: true,
       message: "Test verification sent successfully",
-      sessionId: stripeVerificationSession.id,
+      sessionId: verification.id,
     });
 
   } catch (error) {

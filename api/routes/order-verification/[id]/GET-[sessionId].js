@@ -1,5 +1,6 @@
 import { RouteHandler } from "gadget-server";
-import Stripe from 'stripe';
+
+import { getSessionMedia, getSessionDecision, getSessionImage } from "../../../helpers/veriff";
 
 /**
  * Route handler for order verifications
@@ -9,45 +10,43 @@ import Stripe from 'stripe';
 const route = async ({ request, reply, api, logger, connections }) => {
   const { id, sessionId } = request.params;
 
-  const verification = await api.verification.findOne(id);
+  const internalVerification = await api.verification.maybeFindOne(id);
+
+  if (!internalVerification || internalVerification.sessionId !== sessionId) {
+    logger.error({ 
+      error: "Verification does not exist", 
+      verificationId: id, 
+      sessionId: sessionId 
+    }, "Verification does not exist");
+
+    return reply.code(404).send({ error: "Verification does not exist" });
+  }
 
   try {
-    const stripe = new Stripe(process.env.STRIPE_RESTRICTED_KEY);
-    const stripeVerificationSession = await stripe.identity.verificationSessions.retrieve(
-      verification.sessionId,
-      {
-        expand: [
-          'verified_outputs',
-          'last_verification_report',
-        ],
-      }
-    );
+    const veriffSessionMedia = await getSessionMedia(internalVerification.sessionId);
+    const veriffSessionDecision = await getSessionDecision(internalVerification.sessionId);
 
-    // Retrieve the File id
-    const report = stripeVerificationSession.last_verification_report;
-    const documentFrontFile = report.document.files[0];
-    const documentBackFile = report.document.files[1];
+    const { images } = veriffSessionMedia;
+    const { verification } = veriffSessionDecision;
+    const { acceptanceTime, person, document } = verification;
 
-    // Create a short-lived FileLinks
-    const fileLinkFront = await stripe.fileLinks.create({
-      file: documentFrontFile,
-      expires_at: Math.floor(Date.now() / 1000) + 30,  // link expires in 30 seconds
-    });
+    let rawImages = [];
 
-    const fileLinkBack = await stripe.fileLinks.create({
-      file: documentBackFile,
-      expires_at: Math.floor(Date.now() / 1000) + 30,  // link expires in 30 seconds
-    });
-
-    // Access the FileLink URL to download file contents
-    const fileUrlFront = fileLinkFront.url;
-    const fileUrlBack = fileLinkBack.url;
-
-    const { last_verification_report } = stripeVerificationSession;
+    for (const image of images) {
+      const rawImageBuffer = await getSessionImage(image.id, image.url);
+      
+      // Convert buffer to base64
+      const base64Image = Buffer.from(rawImageBuffer).toString('base64');
+      const dataUrl = `data:image/png;base64,${base64Image}`;
+      
+      rawImages.push(dataUrl);
+    }
 
     return reply.code(200).send({
-      lastVerificationReport: last_verification_report,
-      files: [fileUrlFront, fileUrlBack],
+      acceptanceTime,
+      person,
+      document,
+      rawImages,
       internalVerification: verification
      });
   } catch (error) {
@@ -55,9 +54,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
       error, 
       shopId: request.params.id, 
       sessionId: request.params.sessionId 
-    }, "Failed to retrieve single verification from Stripe");
+    }, "Failed to retrieve verification from Veriff");
 
-    return reply.code(500).send({ error: "Failed to retrieve single verification from Stripe" });
+    return reply.code(500).send({ error: "Failed to retrieve verification from Veriff" });
   }
 }
 

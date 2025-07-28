@@ -73,7 +73,7 @@ export const PlanCard = ({
 
           <InlineStack blockAlign="end" gap="100" align="start">
             <Box paddingBlockEnd="200">
-              <Text variant="bodySm">+ $2.00 per verification</Text>
+              <Text variant="bodySm">+ $1.00 per verification</Text>
             </Box>
           </InlineStack>
 

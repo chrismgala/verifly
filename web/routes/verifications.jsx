@@ -85,7 +85,7 @@ export const VerificationsPage = () => {
     (() => {
       const selectedIndex = selectedResources[0];
       const selectedVerification = verifications?.[selectedIndex];
-      return selectedVerification && selectedVerification.customer.status !== 'verified';
+      return selectedVerification && selectedVerification.customer.status !== 'approved';
     })();
 
   const handleResendEmail = async () => {
@@ -162,7 +162,7 @@ export const VerificationsPage = () => {
                 position={index}
               >
                 <IndexTable.Cell>
-                  {customer.status === 'verified' ? (
+                  {customer.status === 'approved' ? (
                     <Link to={`/verification/${id}/${sessionId}`}>
                       <Text variant="bodyMd" fontWeight="bold" as="span">
                         {orderName}
@@ -200,12 +200,18 @@ export const VerificationsPage = () => {
 
   function displayVerificationBadge(status) {
     switch (status) {
-      case 'verified':
-        return <Badge tone="success">Verified</Badge>;
+      case 'approved':
+        return <Badge tone="success">Approved</Badge>;
+      case 'denied':
+        return <Badge tone="critical">Denied</Badge>;
+      case 'resubmit':
+        return <Badge tone="attention">Resubmission required</Badge>;
+      case 'expired':
+        return <Badge tone="warning">Expired</Badge>;
+      case 'abandoned':
+        return <Badge tone="warning">Abandoned</Badge>;
       case 'pending':
-        return <Badge tone="critical">Action required</Badge>;
-      case 'unverified':
-        return <Badge tone="warning">Unverified</Badge>;
+        return <Badge tone="info">Pending</Badge>;
       default:
     }
   }

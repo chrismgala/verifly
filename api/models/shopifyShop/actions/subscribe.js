@@ -114,7 +114,7 @@ export const run = async ({
         {
           plan: {
             appUsagePricingDetails: {
-              terms: "$2.00 per verification. This covers our API costs of $1.50 per verification.",
+              terms: "$1.00 per verification.",
               cappedAmount: {
                 amount: planFromDatabase.usageCap.toFixed(2),
                 currencyCode: "USD"

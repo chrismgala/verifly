@@ -1,7 +1,9 @@
 import { Resend } from 'resend';
-import Stripe from 'stripe';
 
 import { URL } from "url";
+
+import VerificationEmail from '../../web/components/VerificationEmail/VerificationEmail';
+import { createVerificationSession } from '../helpers/veriff';
 
 /** @type { ActionRun } */
 export const run = async ({ trigger, logger, api }) => {
@@ -102,11 +104,7 @@ export const onSuccess = async ({ trigger, logger, api }) => {
     const orderPrice = order.total_price;
 
     const shopId = orderStatusUrl.pathname.split('/')[1];
-    const shop = await api.shopifyShop.maybeFindFirst({
-      filter: {
-        id: { equals: shopId }
-      }
-    });
+    const shop = await api.shopifyShop.maybeFindOne(shopId);
     const shopName = shop?.name || '';
     
     const customer = await api.shopifyCustomer.maybeFindFirst({
@@ -141,10 +139,10 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       return;
     }
 
-    if (customer.status === 'verified') {
+    if (customer.status === 'approved') {
       logger.info(
         { orderId: order.id, customerEmail },
-        "Abort verification email - customer is already verified"
+        "Abort verification email - customer is already approved"
       );
       return;
     }
@@ -167,26 +165,11 @@ export const onSuccess = async ({ trigger, logger, api }) => {
 
     try {
       // Send verification email
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       const resend = new Resend(process.env.RESEND_API_KEY);
 
-      // Create the session.
-      const stripeVerificationSession = await stripe.identity.verificationSessions.create({
-        type: 'document',
-        provided_details: {
-          email: customerEmail,
-        },
-        metadata: {
-          customer_id: order.customer?.id,
-          shop_id: shopId,
-          order_id: order.id
-        },
-      });
-
       // Create the verification immediately so merchants can see verifications in progress
-      const newVerification = await api.verification.create({
-        sessionId: stripeVerificationSession.id,
-        status: stripeVerificationSession.status,
+      const internalVerification = await api.verification.create({
+        status: 'pending',
         shop: {
           _link: shopId
         },
@@ -198,27 +181,37 @@ export const onSuccess = async ({ trigger, logger, api }) => {
         }
       });
 
-      logger.info({ newVerification, shop, customer, order }, "Created new verification record");
+      logger.info({ customer, order }, "Created new verification record");
 
-      const stripeVerificationUrl = stripeVerificationSession.url;
+      const veriffVerification = await createVerificationSession({
+        verification: {
+          person: {
+            firstName: customerFirstName,
+            lastName: customerLastName,
+            email: customerEmail,
+          },
+          vendorData: internalVerification.id
+        },
+      });
+
+      const { verification } = veriffVerification;
+      const { url } = verification;
+
+      // Add in sessionId for future retrieval using Veriff endpoints
+      await api.verification.update(internalVerification.id, {
+        sessionId: verification.id,
+      });
 
       const { data, error } = await resend.emails.send({
         from: 'Verifly <info@verifly.shop>',
         to: customerEmail,
-        subject: `[Action required] Complete verification to avoid delays in shipping your ${shopName} order`,
-        html: `
-          <h2>Please Verify Yourself With ${shopName}</h2>
-          
-          <p>Hey there ${customerName},</p>
-          
-          <p>
-            Your Order ${orderNumber} for ${shopName} has been received. However, ID verification is required to approve fulfillment of your order.
-          </p>
-          
-          <p>Please click below to verify your information:</p>
-
-          <a href="${stripeVerificationUrl}" target="_blank">Verify Now</a>
-        `
+        subject: `[Action required] Verify your identity`,
+        react: VerificationEmail({
+          shopName,
+          customerName,
+          orderNumber,
+          url
+        })
       });
 
       if (error) {
@@ -236,7 +229,7 @@ export const onSuccess = async ({ trigger, logger, api }) => {
           orderName: order.name,
           topic: trigger.topic
         },
-        "Error sending verification email"
+        "Error creating verification or sending email"
       );
       throw error;
     }

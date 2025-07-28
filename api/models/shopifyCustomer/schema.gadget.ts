@@ -14,10 +14,15 @@ export const schema: GadgetModel = {
     },
     status: {
       type: "enum",
-      default: "unverified",
       acceptMultipleSelections: false,
       acceptUnlistedOptions: false,
-      options: ["unverified", "pending", "verified"],
+      options: [
+        "approved",
+        "denied",
+        "resubmit",
+        "expired",
+        "abandoned",
+      ],
       validations: { required: true },
       storageKey: "rAcTYIHE6Eim",
     },

@@ -1,5 +1,4 @@
 import { RouteHandler } from "gadget-server";
-import Stripe from 'stripe';
 
 /**
  * Route handler for order verifications
@@ -16,7 +15,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     // Update verification status internally
     try {
       await api.verification.update(id, {
-        status: 'verified'
+        status: 'approved'
       });
     } catch (error) {
       logger.error({ 

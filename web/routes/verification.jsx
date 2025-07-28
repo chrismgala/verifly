@@ -42,8 +42,10 @@ export const VerificationPage = () => {
     }
   });
 
-  const lastVerificationReport = data?.lastVerificationReport;
-  const files = data?.files;
+  const person = data?.person;
+  const document = data?.document;
+  const rawImages = data?.rawImages;
+  const acceptanceTime = data?.acceptanceTime;
   const internalVerification = data?.internalVerification;
 
   // Initialize local state when data is loaded
@@ -57,7 +59,7 @@ export const VerificationPage = () => {
   useEffect(() => {
     if (overrideData && !overrideFetching && !overrideError) {
       // Update local state immediately
-      setLocalVerificationStatus('verified');
+      setLocalVerificationStatus('approved');
       setIsOverriding(false);
     } else if (overrideError) {
       console.error('Override error:', overrideError);
@@ -77,7 +79,7 @@ export const VerificationPage = () => {
 
   // Use local status for UI, fallback to server status
   const currentStatus = localVerificationStatus || internalVerification?.status;
-  const isVerified = currentStatus === 'verified';
+  const isVerified = currentStatus === 'approved';
   const isLoading = isOverriding || overrideFetching;
 
   if (error) { console.error(error); }
@@ -137,26 +139,8 @@ export const VerificationPage = () => {
               </Text>
   
               <Text as="p" variant="bodyMd">
-                {lastVerificationReport?.document?.first_name} {lastVerificationReport?.document?.last_name}
+                {person?.firstName} {person?.lastName}
               </Text>
-            </BlockStack>
-            
-            <BlockStack gap="200">
-              <Text as="h2" variant="headingSm">
-                Address
-              </Text>
-  
-              <div>
-                <Text as="p" variant="bodyMd">
-                  {lastVerificationReport?.document?.address?.line1}
-                </Text>
-                <Text as="p" variant="bodyMd">
-                  {lastVerificationReport?.document?.address?.line2}
-                </Text>
-                <Text as="p" variant="bodyMd">
-                  {lastVerificationReport?.document?.address?.city}, {lastVerificationReport?.document?.address?.state} {lastVerificationReport?.document?.address?.postal_code}
-                </Text>
-              </div>
             </BlockStack>
   
             <BlockStack gap="200">
@@ -166,7 +150,11 @@ export const VerificationPage = () => {
   
               <div>
                 <Text as="p" variant="bodyMd">
-                  {lastVerificationReport?.document?.type === 'driving_license' ? 'Driver License' : 'Other'}
+                  {document?.type === 'DRIVERS_LICENSE' && 'Driver\'s License'}
+                  {document?.type === 'PASSPORT' && 'Passport'}
+                  {document?.type === 'ID_CARD' && 'ID Card'}
+                  {document?.type === 'RESIDENCE_PERMIT' && 'Residence Permit'}
+                  {document?.type === 'OTHER' && 'Other'}
                 </Text>
               </div>
             </BlockStack>
@@ -178,23 +166,23 @@ export const VerificationPage = () => {
   
               <div>
                 <Text as="p" variant="bodyMd">
-                  {new Date(lastVerificationReport?.created * 1000).toLocaleString()}
+                  {new Date(acceptanceTime).toLocaleString()}
                 </Text>
               </div>
             </BlockStack>
   
-            <Button onClick={() => shopify.modal.show('verification-document-images')}>View Document Images</Button>
+            <Button onClick={() => shopify.modal.show('verification-document-images')}>View Verification Images</Button>
           </BlockStack>
         </Card>
   
         <Modal id="verification-document-images">
-          <TitleBar title="Document Images">
+          <TitleBar title="Verification Images">
             <button onClick={() => shopify.modal.hide('verification-document-images')}>Close</button>
           </TitleBar>
   
           <div>
-            {files?.map((file, index) => (
-              <img key={index} src={file} />
+            {rawImages?.map((image, index) => (
+              <img key={index} src={image} />
             ))}
           </div>
         </Modal>
@@ -204,14 +192,18 @@ export const VerificationPage = () => {
 
   function displayVerificationBadge(status) {
     switch (status) {
-      case 'verified':
-        return <Badge tone="success">Verified</Badge>;
-      case 'processing':
-        return <Badge tone="info">Processing</Badge>;
-      case 'requires_input':
-        return <Badge tone="attention">Action required</Badge>;
-      case 'canceled':
-        return <Badge tone="critical">Canceled</Badge>;
+      case 'approved':
+        return <Badge tone="success">Approved</Badge>;
+      case 'denied':
+        return <Badge tone="critical">Denied</Badge>;
+      case 'resubmit':
+        return <Badge tone="attention">Resubmission required</Badge>;
+      case 'expired':
+        return <Badge tone="warning">Expired</Badge>;
+      case 'abandoned':
+        return <Badge tone="warning">Abandoned</Badge>;
+      case 'pending':
+        return <Badge tone="info">Pending</Badge>;
       default:
     }
   }
