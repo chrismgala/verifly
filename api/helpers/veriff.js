@@ -32,7 +32,7 @@ export const getSessionDecision = async (sessionId) => {
       method: "GET",
       headers: headers,
     };
-    const response = await fetch(`${process.env.VERIFF_API_URL}/sessions/${sessionId}/decision`, options);
+    const response = await fetch(`${process.env.VERIFF_API_URL}/sessions/${sessionId}/decision/fullauto?version=1.0.0`, options);
     return await response.json();
 
   } catch (error) {

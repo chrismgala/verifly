@@ -2,6 +2,7 @@ import { RouteHandler } from "gadget-server";
 import { Resend } from "resend";
 
 import { createVerificationSession } from "../../helpers/veriff";
+import VerificationEmail from "../../../web/components/VerificationEmail/VerificationEmail";
 
 /**
  * Route handler for order verifications
@@ -13,7 +14,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const shopId = request.params.shopId;
     const { testEmail } = request.body;
 
-    logger.info(`Processing test verification for shopId: ${shopId}, email: ${testEmail}`);
+    logger.info({ shopId }, 'Processing test verification');
 
     // Find the shop by ID
     const shop = await api.shopifyShop.findOne(shopId, {

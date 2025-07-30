@@ -13,6 +13,7 @@ export const schema: GadgetModel = {
       parent: { model: "shopifyCustomer" },
       storageKey: "qlVm8Ee60dbO",
     },
+    emailId: { type: "string", storageKey: "cxsFNXOYHL0W" },
     order: {
       type: "belongsTo",
       validations: { unique: true },

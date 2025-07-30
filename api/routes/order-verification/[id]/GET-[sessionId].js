@@ -2,6 +2,8 @@ import { RouteHandler } from "gadget-server";
 
 import { getSessionMedia, getSessionDecision, getSessionImage } from "../../../helpers/veriff";
 
+const EXCLUDED_DOCUMENT_NAMES = ['face-pre', 'document-front-pre', 'document-back-pre'];
+
 /**
  * Route handler for order verifications
  *
@@ -27,8 +29,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const veriffSessionDecision = await getSessionDecision(internalVerification.sessionId);
 
     const { images } = veriffSessionMedia;
-    const { verification } = veriffSessionDecision;
-    const { acceptanceTime, person, document } = verification;
+    const { person, document } = veriffSessionDecision;
 
     let rawImages = [];
 
@@ -39,15 +40,17 @@ const route = async ({ request, reply, api, logger, connections }) => {
       const base64Image = Buffer.from(rawImageBuffer).toString('base64');
       const dataUrl = `data:image/png;base64,${base64Image}`;
       
-      rawImages.push(dataUrl);
+      if (!EXCLUDED_DOCUMENT_NAMES.includes(image.name)) {
+        rawImages.push(dataUrl);
+      }
     }
 
     return reply.code(200).send({
-      acceptanceTime,
+      acceptanceTime: internalVerification.updatedAt,
       person,
       document,
       rawImages,
-      internalVerification: verification
+      internalVerification
      });
   } catch (error) {
     logger.error({ 

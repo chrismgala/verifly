@@ -19,6 +19,7 @@
     "@gadget-client/verifly": "link:.gadget/client",
     "@gadgetinc/react": "^0.21.0",
     "@gadgetinc/react-shopify-app-bridge": "0.18.3",
+    "@react-email/components": "^0.3.2",
     "@shopify/app-bridge-react": "^4.1.5",
     "@shopify/polaris": "^13.8.0",
     "@shopify/polaris-icons": "^9.3.0",

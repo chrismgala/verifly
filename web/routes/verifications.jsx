@@ -4,14 +4,14 @@ import { useFetch } from "@gadgetinc/react";
 
 import {
   Page,
+  Badge,
   Text,
   IndexTable,
   Card,
   IndexFilters,
   useSetIndexFiltersMode,
   useIndexResourceState,
-  Badge,
-  EmptySearchResult
+  EmptySearchResult,
 } from '@shopify/polaris';
 
 import { FullPageError } from "../components/FullPageError";
@@ -85,7 +85,10 @@ export const VerificationsPage = () => {
     (() => {
       const selectedIndex = selectedResources[0];
       const selectedVerification = verifications?.[selectedIndex];
-      return selectedVerification && selectedVerification.customer.status !== 'approved';
+      
+      return selectedVerification && 
+        selectedVerification.customer.status !== 'approved' &&
+        selectedVerification.customer.status !== 'declined';
     })();
 
   const handleResendEmail = async () => {
@@ -197,22 +200,23 @@ export const VerificationsPage = () => {
       </Card>
     </Page>
   );
+}
 
-  function displayVerificationBadge(status) {
-    switch (status) {
-      case 'approved':
-        return <Badge tone="success">Approved</Badge>;
-      case 'denied':
-        return <Badge tone="critical">Denied</Badge>;
-      case 'resubmit':
-        return <Badge tone="attention">Resubmission required</Badge>;
-      case 'expired':
-        return <Badge tone="warning">Expired</Badge>;
-      case 'abandoned':
-        return <Badge tone="warning">Abandoned</Badge>;
-      case 'pending':
-        return <Badge tone="info">Pending</Badge>;
-      default:
-    }
+export function displayVerificationBadge(status) {
+  switch (status) {
+    case 'approved':
+      return <Badge tone="success">Approved</Badge>;
+    case 'declined':
+      return <Badge tone="critical">Declined</Badge>;
+    case 'resubmit':
+      return <Badge tone="attention">Resubmission required</Badge>;
+    case 'expired':
+      return <Badge tone="warning">Expired</Badge>;
+    case 'abandoned':
+      return <Badge tone="warning">Abandoned</Badge>;
+    case 'pending':
+      return <Badge tone="info">Pending</Badge>;
+    default:
+      return null;
   }
 }

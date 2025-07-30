@@ -8,7 +8,7 @@ import { isSignatureValid } from '../../helpers/veriff';
  * @type { RouteHandler } route handler - see: https://docs.gadget.dev/guides/http-routes/route-configuration#route-context
  */
 const route = async ({ request, reply, api, logger, connections }) => {
-  let verificationId;
+  let verificationId, verification;
 
   // Verify the event came from Stripe
   try {
@@ -21,9 +21,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
       return reply.code(400).send({ error: 'Invalid signature' });
     }
 
-    const { data } = payload;
-    const { verification } = data;
-    verificationId = verification.vendorData;
+    const { data, vendorData } = payload;
+    verification = data.verification;
+    verificationId = vendorData;
 
     logger.info({ verificationId }, `[Veriff - Verify Outcome] Incoming verification decision`);
   } catch (error) {
@@ -33,9 +33,15 @@ const route = async ({ request, reply, api, logger, connections }) => {
   }
 
   // First look for an existing verification record with this session ID
-  const internalVerification = await api.verification.findOne(verificationId);
-  const customer = await api.shopifyCustomer.findOne(internalVerification.customerId);
-  const order = await api.shopifyOrder.findOne(internalVerification.orderId);
+  const internalVerification = await api.verification.findById(verificationId);
+  const customer = await api.shopifyCustomer.findFirst({
+    filter: {
+      platformCustomerId: {
+        equals: parseFloat(internalVerification.customerId)
+      }
+    }
+  });
+  const order = await api.shopifyOrder.findById(internalVerification.orderId);
   const shopId = internalVerification.shopId;
 
   switch (verification.decision) {
@@ -57,9 +63,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
         await api.shopifyCustomer.update(customer.id, {
           status: "approved"
         });
-        logger.info({ customerId }, `[Veriff - Verify Outcome] Customer status updated`);
+        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
       } catch (error) {
-        logger.error({ customerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
+        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
         return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
       }
 
@@ -84,9 +90,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
         await api.shopifyCustomer.update(customer.id, {
           status: "denied"
         });
-        logger.info({ customerId }, `[Veriff - Verify Outcome] Customer status updated`);
+        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
       } catch (error) {
-        logger.error({ customerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
+        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
         return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
       }
 
@@ -111,9 +117,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
         await api.shopifyCustomer.update(customer.id, {
           status: "resubmit"
         });
-        logger.info({ customerId }, `[Veriff - Verify Outcome] Customer status updated`);
+        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
       } catch (error) {
-        logger.error({ customerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
+        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
         return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
       }
 
@@ -138,9 +144,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
         await api.shopifyCustomer.update(customer.id, {
           status: "expired"
         });
-        logger.info({ customerId }, `[Veriff - Verify Outcome] Customer status updated`);
+        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
       } catch (error) {
-        logger.error({ customerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
+        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
         return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
       }
 
@@ -165,9 +171,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
         await api.shopifyCustomer.update(customer.id, {
           status: "abandoned"
         });
-        logger.info({ customerId }, `[Veriff - Verify Outcome] Customer status updated`);
+        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
       } catch (error) {
-        logger.error({ customerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
+        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
         return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
       }
 

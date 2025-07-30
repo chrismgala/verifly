@@ -113,12 +113,12 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       }
     });
 
-    const customerFirstName = customer.first_name || '';
-    const customerLastName = customer.last_name || '';
+    const customerFirstName = customer?.firstName || '';
+    const customerLastName = customer?.lastName || '';
     const customerName = customerFirstName ?
       `${customerFirstName} ${customerLastName}`.trim() :
       'Customer';
-    const customerEmail = customer.email;
+    const customerEmail = customer?.email;
 
     logger.info(
       {
@@ -155,9 +155,9 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       return;
     }
 
-    if (!shop.triggerPrice || orderPrice < shop.triggerPrice) {
+    if (orderPrice < shop.triggerPrice) {
       logger.warn(
-        { orderId: order.id, customerEmail },
+        { orderId: order.id, customerEmail, orderPrice, shopTriggerPrice: shop.triggerPrice },
         "Abort verification email - order price is below trigger price"
       );
       return;
@@ -220,6 +220,10 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       }
 
       logger.info({ emailId: data?.id }, "Verification email sent successfully");
+
+      await api.verification.update(internalVerification.id, {
+        emailId: data?.id
+      });
 
     } catch (error) {
       logger.error(

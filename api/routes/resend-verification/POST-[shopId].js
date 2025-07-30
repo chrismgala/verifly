@@ -26,21 +26,6 @@ const route = async ({ request, reply, api, logger, connections }) => {
       return reply.code(404).send({ error: "Verification does not exist" });
     }
 
-    const newInternalVerification = await api.verification.create({
-      status: 'pending',
-      shop: {
-        _link: shopId
-      },
-      customer: {
-        _link: internalVerification.customerId
-      },
-      order: {
-        _link: internalVerification.orderId
-      }
-    });
-
-    logger.info({ newInternalVerification }, "Created new verification record");
-
     const shop = await api.shopifyShop.findOne(shopId, {
       select: {
         name: true
@@ -78,34 +63,26 @@ const route = async ({ request, reply, api, logger, connections }) => {
       'Customer';
     const customerEmail = customer.email;
 
-    const veriffVerification = await createVerificationSession({
-      verification: {
-        person: {
-          firstName: customerFirstName,
-          lastName: customerLastName,
-          email: customerEmail,
-        },
-        vendorData: newInternalVerification.id
-      },
-    });
-
-    const { verification } = veriffVerification;
-    const { url } = verification;
-
     // Send email using Resend
 
     const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const response = await resend.emails.get(internalVerification.emailId);
+
+    if (response.error) {
+      logger.error({ error: response.error }, "Error getting verification email");
+      return reply.code(500).send({
+        error: "Failed to get verification email"
+      });
+    }
+
+    const html = response.data.html;
     
     const { data, error } = await resend.emails.send({
       from: 'Verifly <info@verifly.shop>',
       to: customerEmail,
       subject: `[Action required] Verify your identity`,
-      react: VerificationEmail({
-        shopName,
-        customerName,
-        orderNumber,
-        url
-      })
+      html
     });
 
     if (error) {
@@ -113,7 +90,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       return;
     }
 
-    logger.info({ emailId: data?.id }, "Verification email sent successfully");
+    logger.info({ emailId: data?.id }, "Verification email resent successfully");
 
     await reply.code(200).send({
       message: "Verification email resent successfully",

@@ -14,6 +14,7 @@ export const schema: GadgetModel = {
     },
     status: {
       type: "enum",
+      default: "unverified",
       acceptMultipleSelections: false,
       acceptUnlistedOptions: false,
       options: [
@@ -22,8 +23,8 @@ export const schema: GadgetModel = {
         "resubmit",
         "expired",
         "abandoned",
+        "unverified",
       ],
-      validations: { required: true },
       storageKey: "rAcTYIHE6Eim",
     },
     verification: {

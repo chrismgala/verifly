@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { useOutletContext } from "react-router";
 import { useSession, useFetch } from '@gadgetinc/react';
-import { Page, Layout, Text, TextField, Button } from '@shopify/polaris';
-import { api } from '../api';
 
-export function TestPage() {
-  const { shopId, shop } = useSession();
+import { Page, Layout, TextField, Button } from '@shopify/polaris';
+
+export const TestPage = () => {
+  const { shopId, shop } = useOutletContext();
 
   const isTrialActivated = shop?.confirmationUrl && shop?.veriflyPlan;
 
@@ -32,7 +33,7 @@ export function TestPage() {
   };
 
   return (
-    <Page title="Test">
+    <Page title="Test" subtitle="Each shop is allowed to send 1 test verification. If the form is disabled, it means you haven't activated your trial or you've used your test verification.">
       <Layout>
         <Layout.AnnotatedSection
           title="Test Verification"

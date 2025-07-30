@@ -21,3 +21,8 @@
 .Polaris-Box {
   min-height: initial;
 }
+
+input:disabled,
+.Polaris-Button--disabled {
+  cursor: not-allowed;
+}
