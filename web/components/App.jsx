@@ -24,6 +24,7 @@ import { IndexPage } from "../routes/index";
 import { BillingPage } from "../routes/billing";
 import { VerificationsPage } from "../routes/verifications";
 import { VerificationPage } from "../routes/verification";
+import { ProductsPage } from "../routes/products";
 import { SettingsPage } from "../routes/settings";
 import { TestPage } from "../routes/test";
 
@@ -60,6 +61,7 @@ function App() {
         <Route index element={<IndexPage />} />
         <Route path="verifications" element={<VerificationsPage />} />
         <Route path="verification/:id/:sessionId" element={<VerificationPage />} />
+        <Route path="products" element={<ProductsPage />} />
         <Route path="test" element={<TestPage />} />
         <Route path="billing" element={<BillingPage />} />
         <Route path="settings" element={<SettingsPage />} />
@@ -152,6 +154,9 @@ function EmbeddedApp() {
         </Link>
         <Link to="/verifications" rel="verifications">
           Verifications
+        </Link>
+        <Link to="/products" rel="products">
+          Products
         </Link>
         <Link to="/test" rel="test-verification">
           Test

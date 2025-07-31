@@ -38,6 +38,18 @@ export const onSuccess = async ({
   });
 
   try {
+    await api.shopifySync.run({
+      shopifySync: {
+        domain: record.domain,
+        shop: {
+          _link: record.id,
+        },
+        models: [
+          "shopifyProduct",
+        ],
+      },
+    });
+
     // Initialize shop settings in our app by updating the shop record
     // with any default configurations or preferences
     await api.shopifyShop.update(record.id, {
