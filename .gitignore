@@ -1,6 +1,7 @@
-.env
-.gadget/
-node_modules/
 **/.DS_Store
-.react-router/
+node_modules/
+.env
 .shopify
+.crush
+.gadget/
+.react-router/
