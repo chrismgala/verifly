@@ -125,7 +125,9 @@ export const onSuccess = async ({ trigger, logger, api }) => {
         shopId: {
           equals: shopId
         },
-        needsVerification: true
+        needsVerification: {
+          equals: true
+        }
       },
       select: {
         id: true
@@ -133,7 +135,7 @@ export const onSuccess = async ({ trigger, logger, api }) => {
     });
 
     const productIdsFromOrder = order.line_items.map(lineItem => lineItem.product_id);
-    const productsToVerify = productsNeedingVerification.filter(product => productIdsFromOrder.includes(product.id));
+    const productsToVerify = productsNeedingVerification.filter(product => productIdsFromOrder.includes(parseFloat(product.id)));
 
     logger.info(
       {
@@ -180,7 +182,7 @@ export const onSuccess = async ({ trigger, logger, api }) => {
 
     if (productsToVerify.length === 0) {
       logger.warn(
-        { orderId: order.id, customerEmail, productsToVerify },
+        { orderId: order.id, customerEmail, productsNeedingVerification, productIdsFromOrder },
         "Abort verification email - no products need verification"
       );
       return;
