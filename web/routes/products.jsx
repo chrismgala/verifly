@@ -26,7 +26,6 @@ export const ProductsPage = () => {
   const isTrialActivated = shop?.confirmationUrl && shop?.veriflyPlan;
 
   // State for products and selections
-  const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState(new Set());
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -44,6 +43,9 @@ export const ProductsPage = () => {
     }
   });
 
+  if (productsError) { console.error(productsError); }
+  const products = productsData?.products;
+
   // Load products on component mount
   useEffect(() => {
     if (isTrialActivated) {
@@ -51,20 +53,19 @@ export const ProductsPage = () => {
     }
   }, [isTrialActivated]);
 
-  // Update products data when fetched
+  // Initial products
   useEffect(() => {
-    if (productsData?.products) {
-      setProducts(productsData.products);
+    if (products) {
       // Initialize selected products based on needsVerification
       const initialSelected = new Set();
-      productsData.products.forEach(product => {
+      products.forEach(product => {
         if (product.needsVerification) {
           initialSelected.add(product.id);
         }
       });
       setSelectedProducts(initialSelected);
     }
-  }, [productsData]);
+  }, [products]);
 
   // Handle product selection
   const handleProductToggle = (productId) => {
@@ -221,15 +222,7 @@ export const ProductsPage = () => {
                   <Text variant="bodyMd">Loading your products...</Text>
                 </div>
               </div>
-            ) : productsError ? (
-              <div style={{ padding: '40px', textAlign: 'center' }}>
-                <Banner tone="critical">
-                  <Text as="p" variant="bodyMd">
-                    Failed to load products. Please refresh the page and try again.
-                  </Text>
-                </Banner>
-              </div>
-            ) : products.length === 0 ? (
+            ) : products && products.length === 0 ? (
               <EmptyState
                 heading="No products found"
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
@@ -238,7 +231,7 @@ export const ProductsPage = () => {
                   No products were found in your Shopify store. Products will appear here once they are created in your Shopify Admin.
                 </Text>
               </EmptyState>
-            ) : (
+            ) : products && products.length > 0 && (
               <ResourceList
                 items={products}
                 renderItem={renderProductItem}
@@ -246,10 +239,10 @@ export const ProductsPage = () => {
               />
             )}
 
-            {products.length > 0 && (
+            {products && products.length > 0 && (
               <div style={{ padding: '16px', borderTop: '1px solid #e1e3e5' }}>
                 <Text variant="bodyMd">
-                  <strong>{selectedProducts.size}</strong> of <strong>{products.length}</strong> products selected for verification
+                  <strong>{selectedProducts.size}</strong> of <strong>{products && products.length}</strong> products selected for verification
                 </Text>
               </div>
             )}

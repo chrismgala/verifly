@@ -120,6 +120,21 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       'Customer';
     const customerEmail = customer?.email;
 
+    const productsNeedingVerification = await api.shopifyProduct.findMany({
+      filter: {
+        shopId: {
+          equals: shopId
+        },
+        needsVerification: true
+      },
+      select: {
+        id: true
+      }
+    });
+
+    const productIdsFromOrder = order.line_items.map(lineItem => lineItem.product_id);
+    const productsToVerify = productsNeedingVerification.filter(product => productIdsFromOrder.includes(product.id));
+
     logger.info(
       {
         orderId: order.id,
@@ -159,6 +174,14 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       logger.warn(
         { orderId: order.id, customerEmail, orderPrice, shopTriggerPrice: shop.triggerPrice },
         "Abort verification email - order price is below trigger price"
+      );
+      return;
+    }
+
+    if (productsToVerify.length === 0) {
+      logger.warn(
+        { orderId: order.id, customerEmail, productsToVerify },
+        "Abort verification email - no products need verification"
       );
       return;
     }
