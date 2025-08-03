@@ -150,7 +150,7 @@ export const ProductsPage = () => {
               </Text>
             </div>
             <div style={{ marginTop: '4px' }}>
-              <Badge tone={product.status === 'ACTIVE' ? 'success' : 'attention'}>
+              <Badge tone={product.status.toUpperCase() === 'ACTIVE' ? 'success' : 'attention'}>
                 {product.status}
               </Badge>
             </div>
