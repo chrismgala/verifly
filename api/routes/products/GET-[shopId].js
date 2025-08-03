@@ -29,12 +29,15 @@ const route = async ({ request, reply, api, logger, connections }) => {
               title
               handle
               status
-              vendor
-              productType
               tags
-              publishedAt
-              createdAt
-              updatedAt
+              variants(first: 10) {
+                edges {
+                  node {
+                    id
+                    title
+                  }
+                }
+              }
             }
           }
           pageInfo {
@@ -58,7 +61,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
         const shopifyProductId = shopifyProduct.id.split('/').pop();
         
         // Check if product exists in our database
-        let existingProduct = await api.shopifyProduct.findById(shopifyProductId);
+        let existingProduct = await api.shopifyProduct.maybeFindById(shopifyProductId);
 
         if (!existingProduct) {
           // Create new product in our database
@@ -67,12 +70,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
             title: shopifyProduct.title,
             handle: shopifyProduct.handle,
             status: shopifyProduct.status,
-            vendor: shopifyProduct.vendor,
-            productType: shopifyProduct.productType,
             tags: shopifyProduct.tags,
-            publishedAt: shopifyProduct.publishedAt,
-            shopifyCreatedAt: shopifyProduct.createdAt,
-            shopifyUpdatedAt: shopifyProduct.updatedAt,
             needsVerification: false,
             shop: {
               _link: shopId
@@ -85,24 +83,42 @@ const route = async ({ request, reply, api, logger, connections }) => {
               title: shopifyProduct.title,
               handle: shopifyProduct.handle,
               status: shopifyProduct.status,
-              vendor: shopifyProduct.vendor,
-              productType: shopifyProduct.productType,
               tags: shopifyProduct.tags,
-              publishedAt: shopifyProduct.publishedAt,
-              shopifyUpdatedAt: shopifyProduct.updatedAt
             }
           });
         }
 
+        // Now process the variants in case the merchant only needs ID for certain ones
+        const variants = shopifyProduct.variants.edges.map(edge => edge.node);
+        let internalVariants = [];
+
+        for (const variant of variants) {
+          const variantId = variant.id.split('/').pop();
+          let existingVariant = await api.shopifyProductVariant.maybeFindById(variantId);
+          
+          if (!existingVariant) {
+            // Create new variant in our database
+            existingVariant = await api.shopifyProductVariant.create({
+              id: variantId,
+              title: variant.title,
+              product: {
+                _link: existingProduct.id
+              }
+            });
+          } else {
+            // Update existing variant with latest data
+            await api.shopifyProductVariant.update(existingVariant.id, {
+              title: variant.title,
+            });
+          }
+
+          internalVariants.push(existingVariant);
+        }
+
         // Add to transformed products array
         transformedProducts.push({
-          id: shopifyProductId,
-          title: existingProduct.title,
-          handle: existingProduct.handle,
-          status: existingProduct.status,
-          vendor: existingProduct.vendor,
-          productType: existingProduct.productType,
-          needsVerification: existingProduct.needsVerification
+          existingProduct,
+          variants: internalVariants
         });
 
       } catch (error) {
