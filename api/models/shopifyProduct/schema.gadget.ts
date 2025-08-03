@@ -30,6 +30,7 @@ export const schema: GadgetModel = {
       "tags",
       "templateSuffix",
       "title",
+      "variants",
       "vendor",
     ],
   },

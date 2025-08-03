@@ -149,6 +149,12 @@ export const permissions: GadgetPermissions = {
               "accessControl/filters/shopify/shopifyProduct.gelly",
           },
         },
+        shopifyProductVariant: {
+          read: {
+            filter:
+              "accessControl/filters/shopify/shopifyProductVariant.gelly",
+          },
+        },
         shopifyShop: {
           read: {
             filter: "accessControl/filters/shopify/shopifyShop.gelly",

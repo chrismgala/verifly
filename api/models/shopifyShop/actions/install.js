@@ -46,6 +46,7 @@ export const onSuccess = async ({
         },
         models: [
           "shopifyProduct",
+          "shopifyProductVariant"
         ],
       },
     });

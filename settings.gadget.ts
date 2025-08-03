@@ -14,6 +14,7 @@ export const settings: GadgetSettings = {
           "shopifyAppUsageRecord",
           "shopifyDomain",
           "shopifyProduct",
+          "shopifyProductVariant",
         ],
         type: "partner",
         scopes: [

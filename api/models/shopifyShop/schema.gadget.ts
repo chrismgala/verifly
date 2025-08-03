@@ -129,6 +129,7 @@ export const schema: GadgetModel = {
       "planName",
       "preLaunchEnabled",
       "primaryLocale",
+      "productVariants",
       "products",
       "province",
       "provinceCode",
