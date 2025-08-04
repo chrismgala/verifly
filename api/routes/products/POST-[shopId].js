@@ -8,24 +8,22 @@ import { RouteHandler } from "gadget-server";
 const route = async ({ request, reply, api, logger }) => {
   try {
     const shopId = request.params.shopId;
-    const { products } = request.body;
+    const { productVariants } = request.body;
 
-    if (!products || !Array.isArray(products)) {
-      return reply.code(400).send({ error: "Invalid request body. Expected 'products' array." });
+    if (!productVariants || !Array.isArray(productVariants)) {
+      return reply.code(400).send({ error: "Invalid request body. Expected 'productVariants' array." });
     }
 
     // Update each product's needsVerification field
-    const updatePromises = products.map(async (product) => {
+    const updatePromises = productVariants.map(async (variant) => {
       try {
-        await api.shopifyProduct.update(product.id, {
-          shopifyProduct: {
-            needsVerification: product.needsVerification
-          }
+        await api.shopifyProductVariant.update(variant.id, {
+          needsVerification: variant.needsVerification
         });
-        return { id: product.id, success: true };
+        return { id: variant.id, success: true, type: 'variant' };
       } catch (error) {
-        logger.error({ error, productId: product.id }, `Failed to update product ${product.id}`);
-        return { id: product.id, success: false, error: error.message };
+        logger.error({ error, productId: variant.id }, `Failed to update product variant ${variant.id}`);
+        return { id: variant.id, success: false, error: error.message };
       }
     });
 
@@ -38,7 +36,7 @@ const route = async ({ request, reply, api, logger }) => {
     }
 
     return reply.code(200).send({ 
-      message: "Products needing verification updated",
+      message: "Updated product variants needing verification",
       updated: successfulUpdates.length,
       failed: failedUpdates.length,
       results

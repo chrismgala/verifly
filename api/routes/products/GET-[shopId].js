@@ -51,7 +51,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       }
     );
 
-    const products = result.products.edges.map(edge => edge.node);
+    const products = result.products.edges.filter(edge => edge.node.status === 'ACTIVE').map(edge => edge.node);
     const transformedProducts = [];
 
     // Process each product and sync with our database
@@ -117,8 +117,17 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
         // Add to transformed products array
         transformedProducts.push({
-          existingProduct,
-          variants: internalVariants
+          id: existingProduct.id,
+          title: existingProduct.title,
+          handle: existingProduct.handle,
+          status: existingProduct.status,
+          tags: existingProduct.tags,
+          needsVerification: existingProduct.needsVerification,
+          variants: internalVariants.map(variant => ({
+            id: variant.id,
+            title: variant.title,
+            needsVerification: variant.needsVerification
+          }))
         });
 
       } catch (error) {

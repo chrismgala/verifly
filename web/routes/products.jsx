@@ -9,12 +9,9 @@ import {
   Card,
   Layout,
   Text,
-  Checkbox,
-  Button,
   Spinner,
   EmptyState,
-  ResourceList,
-  ResourceItem,
+  OptionList,
   Badge
 } from "@shopify/polaris";
 
@@ -26,7 +23,7 @@ export const ProductsPage = () => {
   const isTrialActivated = shop?.confirmationUrl && shop?.veriflyPlan;
 
   // State for products and selections
-  const [selectedProducts, setSelectedProducts] = useState(new Set());
+  const [selectedProductVariants, setSelectedProductVariants] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
 
   // Fetch products from our backend
@@ -56,38 +53,29 @@ export const ProductsPage = () => {
   // Initial products
   useEffect(() => {
     if (products) {
-      // Initialize selected products based on needsVerification
-      const initialSelected = new Set();
-      products.forEach(product => {
-        if (product.needsVerification) {
-          initialSelected.add(product.id);
-        }
+      // Initialize selected products based on needsVerification for both products and variants
+      const initialSelected = [];
+      products.forEach(product => {        
+        // Check if any variants need verification
+        product.variants.forEach(variant => {
+          if (variant.needsVerification) {
+            initialSelected.push(variant.id);
+          }
+        });
       });
-      setSelectedProducts(initialSelected);
+      setSelectedProductVariants(initialSelected);
     }
   }, [products]);
 
-  // Handle product selection
-  const handleProductToggle = (productId) => {
-    const newSelected = new Set(selectedProducts);
-    if (newSelected.has(productId)) {
-      newSelected.delete(productId);
-    } else {
-      newSelected.add(productId);
-    }
-    setSelectedProducts(newSelected);
-    setHasChanges(true);
-  };
-
   // Handle save
   const handleSave = async () => {
-    const productsToUpdate = products.map(product => ({
-      id: product.id,
-      needsVerification: selectedProducts.has(product.id)
+    const productVariantsToUpdate = products.variants.map(variant => ({
+      id: variant.id,
+      needsVerification: selectedProductVariants.includes(variant.id)
     }));
 
     await updateProducts({
-      body: JSON.stringify({ products: productsToUpdate })
+      body: JSON.stringify({ productVariants: productVariantsToUpdate })
     });
 
     setHasChanges(false);
@@ -97,13 +85,13 @@ export const ProductsPage = () => {
   // Handle discard
   const handleDiscard = () => {
     // Reset to original state
-    const originalSelected = new Set();
-    products.forEach(product => {
-      if (product.needsVerification) {
-        originalSelected.add(product.id);
+    const originalSelected = [];
+    products.variants.forEach(variant => {
+      if (variant.needsVerification) {
+        originalSelected.push(variant.id);
       }
     });
-    setSelectedProducts(originalSelected);
+    setSelectedProductVariants(originalSelected);
     setHasChanges(false);
     shopify.saveBar.hide('products-save-bar');
   };
@@ -123,46 +111,28 @@ export const ProductsPage = () => {
     }
   }, [updateData, updating]);
 
-  const renderProductItem = (product) => {
-    const isSelected = selectedProducts.has(product.id);
+  // Format product data for OptionList
+  const formatProductOptions = (products) => {
+    if (!products) return [];
     
-    return (
-      <ResourceItem
-        id={product.id}
-        onClick={() => handleProductToggle(product.id)}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-          <div style={{ marginRight: '12px' }}>
-            <Checkbox
-              checked={isSelected}
-              onChange={() => handleProductToggle(product.id)}
-              disabled={!isTrialActivated}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <Text variant="bodyMd" fontWeight="bold">
-              {product.title}
-            </Text>
-            <div style={{ marginTop: '4px' }}>
-              <Text tone="subdued">
-                {product.vendor && `${product.vendor} • `}
-                {product.productType || 'No type'}
-              </Text>
-            </div>
-            <div style={{ marginTop: '4px' }}>
-              <Badge tone={product.status.toUpperCase() === 'ACTIVE' ? 'success' : 'attention'}>
-                {product.status}
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </ResourceItem>
-    );
+    return products.map(product => {
+      // Create options for variants
+      const variantOptions = product.variants.map(variant => ({
+        value: variant.id,
+        label: variant.title,
+      }));
+      
+      return {
+        title: product.title,
+        options: variantOptions,
+      };
+    });
   };
 
   return (
     <Page
       title="Products"
+      subtitle="If you don't see a product here, check its status in the Shopify Admin > Products."
       backAction={{
         content: "Shop Information",
         onAction: () => navigate("/"),
@@ -232,17 +202,18 @@ export const ProductsPage = () => {
                 </Text>
               </EmptyState>
             ) : products && products.length > 0 && (
-              <ResourceList
-                items={products}
-                renderItem={renderProductItem}
-                loading={fetchingProducts}
+              <OptionList
+                allowMultiple
+                sections={formatProductOptions(products)}
+                selected={selectedProductVariants}
+                onChange={setSelectedProductVariants}
               />
             )}
 
             {products && products.length > 0 && (
               <div style={{ padding: '16px', borderTop: '1px solid #e1e3e5' }}>
                 <Text variant="bodyMd">
-                  <strong>{selectedProducts.size}</strong> of <strong>{products && products.length}</strong> products selected for verification
+                  <strong>{selectedProductVariants.length}</strong> of <strong>{products && products.variants.length}</strong> variants selected for verification
                 </Text>
               </div>
             )}
