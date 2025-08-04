@@ -25,6 +25,7 @@ export const ProductsPage = () => {
   // State for products and selections
   const [selectedProductVariants, setSelectedProductVariants] = useState([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const [removedVariants, setRemovedVariants] = useState([]);
 
   // Fetch products from our backend
   const [{ data: productsData, fetching: fetchingProducts, error: productsError }, fetchProducts] = useFetch(`/products/${shopId}`, {
@@ -43,14 +44,7 @@ export const ProductsPage = () => {
   if (productsError) { console.error(productsError); }
   const products = productsData?.products;
 
-  // Load products on component mount
-  useEffect(() => {
-    if (isTrialActivated) {
-      void fetchProducts();
-    }
-  }, [isTrialActivated]);
-
-  // Initial products
+  // Process initial product variants
   useEffect(() => {
     if (products) {
       // Initialize selected products based on needsVerification for both products and variants
@@ -67,49 +61,48 @@ export const ProductsPage = () => {
     }
   }, [products]);
 
-  // Handle save
+  // OptionList already handles additions. We must handle removals.
+  const reconcileDifferences = (updatedSelections) => {
+    if (updatedSelections.length < selectedProductVariants.length) {
+      const removedVariants = selectedProductVariants.filter(variantId => !updatedSelections.includes(variantId));
+      setRemovedVariants(removedVariants);
+    }
+
+    setHasChanges(true);
+  };
+
+  // Send only the changes
   const handleSave = async () => {
-    const productVariantsToUpdate = products.variants.map(variant => ({
-      id: variant.id,
-      needsVerification: selectedProductVariants.includes(variant.id)
-    }));
-
     await updateProducts({
-      body: JSON.stringify({ productVariants: productVariantsToUpdate })
+      body: JSON.stringify({
+        removedVariants,
+        selectedProductVariants
+       })
     });
-
-    setHasChanges(false);
-    shopify.saveBar.hide('products-save-bar');
+    
+    // Clear changes after successful save
+    setRemovedVariants([]);
   };
 
   // Handle discard
   const handleDiscard = () => {
     // Reset to original state
     const originalSelected = [];
-    products.variants.forEach(variant => {
-      if (variant.needsVerification) {
-        originalSelected.push(variant.id);
-      }
+    products.forEach(product => {        
+      // Check if any variants need verification
+      product.variants.forEach(variant => {
+        if (variant.needsVerification) {
+          originalSelected.push(variant.id);
+        }
+      });
     });
+
     setSelectedProductVariants(originalSelected);
+    setRemovedVariants([]);
+
     setHasChanges(false);
     shopify.saveBar.hide('products-save-bar');
   };
-
-  // Show save bar when there are changes
-  useEffect(() => {
-    if (hasChanges) {
-      shopify.saveBar.show('products-save-bar');
-    }
-  }, [hasChanges]);
-
-  // Handle successful update
-  useEffect(() => {
-    if (updateData && !updating) {
-      // Refresh products to get updated data
-      void fetchProducts();
-    }
-  }, [updateData, updating]);
 
   // Format product data for OptionList
   const formatProductOptions = (products) => {
@@ -129,10 +122,34 @@ export const ProductsPage = () => {
     });
   };
 
+  // Show / hide save bars
+  useEffect(() => {
+    if (hasChanges) {
+      shopify.saveBar.show('products-save-bar');
+    } else {
+      shopify.saveBar.hide('products-save-bar');
+    }
+  }, [hasChanges]);
+
+  // Show success / error toast
+  useEffect(() => {
+    if (updateData) {
+      shopify.toast.show('Products updated successfully', { duration: 4000 });
+    } else if (updateError) {
+      shopify.toast.show('Unable to save products', { duration: 4000, isError: true });
+    }
+
+    setHasChanges(false);
+  }, [updateData, updating]);
+
+  useEffect(() => {
+    console.dir(fetchingProducts);
+  }, [fetchingProducts]);
+
   return (
     <Page
       title="Products"
-      subtitle="If you don't see a product here, check its status in the Shopify Admin > Products."
+      subtitle="If you don't see a product here, it needs to be active. Check its status in the Shopify Admin > Products."
       backAction={{
         content: "Shop Information",
         onAction: () => navigate("/"),
@@ -206,17 +223,20 @@ export const ProductsPage = () => {
                 allowMultiple
                 sections={formatProductOptions(products)}
                 selected={selectedProductVariants}
-                onChange={setSelectedProductVariants}
+                onChange={(selected) => {
+                  setSelectedProductVariants(selected);
+                  reconcileDifferences(selected);
+                }}
               />
             )}
 
-            {products && products.length > 0 && (
+            {/* {products && products.length > 0 && (
               <div style={{ padding: '16px', borderTop: '1px solid #e1e3e5' }}>
                 <Text variant="bodyMd">
                   <strong>{selectedProductVariants.length}</strong> of <strong>{products && products.variants.length}</strong> variants selected for verification
                 </Text>
               </div>
-            )}
+            )} */}
           </Card>
         </Layout.Section>
       </Layout>

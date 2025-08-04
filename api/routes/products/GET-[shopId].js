@@ -17,8 +17,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     const shopify = connections.shopify.current;
     if (!shopify) {
-      throw new Error("Missing Shopify connection");
-    };
+      logger.error({ shopId }, 'Shopify connection not available');
+      return reply.code(503).send({ error: "Shopify connection unavailable" });
+    }
 
     const result = await shopify.graphql(
       `query ($first: Int!) {

@@ -6,46 +6,72 @@ import { RouteHandler } from "gadget-server";
  * @type { RouteHandler } route handler - see: https://docs.gadget.dev/guides/http-routes/route-configuration#route-context
  */
 const route = async ({ request, reply, api, logger }) => {
+  const shopId = request.params.shopId;
+  const { selectedProductVariants, removedVariants } = request.body;
+
   try {
-    const shopId = request.params.shopId;
-    const { productVariants } = request.body;
-
-    if (!productVariants || !Array.isArray(productVariants)) {
-      return reply.code(400).send({ error: "Invalid request body. Expected 'productVariants' array." });
-    }
-
     // Update each product's needsVerification field
-    const updatePromises = productVariants.map(async (variant) => {
+    const updatePromises = selectedProductVariants.map(async (variantId) => {
       try {
-        await api.shopifyProductVariant.update(variant.id, {
-          needsVerification: variant.needsVerification
+        await api.shopifyProductVariant.update(variantId, {
+          needsVerification: true
         });
-        return { id: variant.id, success: true, type: 'variant' };
+        return { id: variantId, success: true, type: 'variant' };
       } catch (error) {
-        logger.error({ error, productId: variant.id }, `Failed to update product variant ${variant.id}`);
-        return { id: variant.id, success: false, error: error.message };
+        logger.error({ error, productId: variantId }, 'Failed to update product variant');
+        return { id: variantId, success: false, error: error.message };
       }
     });
 
-    const results = await Promise.all(updatePromises);
+    const removePromises = removedVariants.map(async (variantId) => {
+      try {
+        await api.shopifyProductVariant.update(variantId, {
+          needsVerification: false
+        });
+        return { id: variantId, success: true, type: 'variant' };
+      } catch (error) {
+        logger.error({ error, productId: variantId }, 'Failed to update product variant');
+        return { id: variantId, success: false, error: error.message };
+      }
+    });
+
+    const results = await Promise.all([...updatePromises, ...removePromises]);
     const successfulUpdates = results.filter(result => result.success);
     const failedUpdates = results.filter(result => !result.success);
 
     if (failedUpdates.length > 0) {
-      logger.warn({ failedUpdates, shopId }, 'Some product updates failed');
+      logger.warn({ failedUpdates, shopId }, 'Some variant updates failed');
     }
 
     return reply.code(200).send({ 
-      message: "Updated product variants needing verification",
       updated: successfulUpdates.length,
-      failed: failedUpdates.length,
-      results
+      failed: failedUpdates.length
     });
 
   } catch (error) {
     logger.error({ error, shopId }, 'Failed to update product verification settings');
     return reply.code(500).send({ error: "Failed to update product verification settings" });
   }
+};
+
+route.options = {
+  schema: {
+    params: {
+      type: "object",
+      properties: {
+        shopId: { type: "string" },
+      },
+      required: ["shopId"],
+    },
+    body: {
+      type: "object",
+      properties: {
+        removedVariants: { type: "array", items: { type: "string" } },
+        selectedProductVariants: { type: "array", items: { type: "string" } },
+      },
+      required: ["removedVariants", "selectedProductVariants"],
+    },
+  },
 };
 
 export default route; 
