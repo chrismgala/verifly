@@ -208,7 +208,7 @@ export function displayVerificationBadge(status) {
       return <Badge tone="success">Approved</Badge>;
     case 'declined':
       return <Badge tone="critical">Declined</Badge>;
-    case 'resubmit':
+    case 'resubmission_request':
       return <Badge tone="attention">Resubmission required</Badge>;
     case 'expired':
       return <Badge tone="warning">Expired</Badge>;
