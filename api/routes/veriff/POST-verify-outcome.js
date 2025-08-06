@@ -34,6 +34,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
   // First look for an existing verification record with this session ID
   const internalVerification = await api.verification.findById(verificationId);
+
+  const shopId = internalVerification.shopId;
+  
   const customer = await api.shopifyCustomer.findFirst({
     filter: {
       platformCustomerId: {
@@ -42,147 +45,45 @@ const route = async ({ request, reply, api, logger, connections }) => {
     }
   });
   const order = await api.shopifyOrder.findById(internalVerification.orderId);
-  const shopId = internalVerification.shopId;
+
+  try {
+    await api.verification.update(internalVerification.id, {
+      status: verification.decision,
+    });
+
+    logger.info({ verificationId }, `[Veriff - Verify Outcome] Internal verification updated`);
+  } catch (error) {
+    logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
+    return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
+  }
+
+  try {
+    await api.shopifyCustomer.update(customer.id, {
+      status: verification.decision
+    });
+    logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
+  } catch (error) {
+    logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
+    return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
+  }
 
   switch (verification.decision) {
     case 'approved': {
-      logger.info({ verificationId }, `[Veriff - Verify Outcome] Verification approved, updating internal verification`);
-
-      try {
-        await api.verification.update(internalVerification.id, {
-          status: 'approved',
-        });
-
-        logger.info({ verificationId }, `[Veriff - Verify Outcome] Internal verification updated`);
-      } catch (error) {
-        logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
-        return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
-      }
-
-      try {
-        await api.shopifyCustomer.update(customer.id, {
-          status: "approved"
-        });
-        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
-      } catch (error) {
-        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
-        return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
-      }
-
-      break;
+      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification approved');
     }
-    
     case 'declined': {
-      logger.info({ verificationId }, `[Veriff - Verify Outcome] Verification denied, updating internal verification`);
-
-      try {
-        await api.verification.update(internalVerification.id, {
-          status: 'denied',
-        });
-
-        logger.info({ verificationId }, `[Veriff - Verify Outcome] Internal verification updated`);
-      } catch (error) {
-        logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
-        return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
-      }
-
-      try {
-        await api.shopifyCustomer.update(customer.id, {
-          status: "denied"
-        });
-        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
-      } catch (error) {
-        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
-        return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
-      }
-
-      break;
+      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification denied');
     }
-    
     case 'resubmission_request': {
-      logger.info({ verificationId }, `[Veriff - Verify Outcome] Verification needs resubmission, updating internal verification`);
-
-      try {
-        await api.verification.update(internalVerification.id, {
-          status: 'resubmit',
-        });
-
-        logger.info({ verificationId }, `[Veriff - Verify Outcome] Internal verification updated`);
-      } catch (error) {
-        logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
-        return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
-      }
-
-      try {
-        await api.shopifyCustomer.update(customer.id, {
-          status: "resubmit"
-        });
-        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
-      } catch (error) {
-        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
-        return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
-      }
-
-      break;
+      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification needs resubmission');
     }
-    
     case 'expired': {
-      logger.info({ verificationId }, `[Veriff - Verify Outcome] Verification expired, updating internal verification`);
-
-      try {
-        await api.verification.update(internalVerification.id, {
-          status: 'expired',
-        });
-
-        logger.info({ verificationId }, `[Veriff - Verify Outcome] Internal verification updated`);
-      } catch (error) {
-        logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
-        return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
-      }
-
-      try {
-        await api.shopifyCustomer.update(customer.id, {
-          status: "expired"
-        });
-        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
-      } catch (error) {
-        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
-        return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
-      }
-
-      break;
+      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification expired');
     }
-
     case 'abandoned': {
-      logger.info({ verificationId }, `[Veriff - Verify Outcome] Verification abandoned, updating internal verification`);
-
-      try {
-        await api.verification.update(internalVerification.id, {
-          status: 'abandoned',
-        });
-
-        logger.info({ verificationId }, `[Veriff - Verify Outcome] Internal verification updated`);
-      } catch (error) {
-        logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
-        return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
-      }
-
-      try {
-        await api.shopifyCustomer.update(customer.id, {
-          status: "abandoned"
-        });
-        logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
-      } catch (error) {
-        logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
-        return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
-      }
-
-      break;
+      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification abandoned');
     }
-
-    default: {
-      logger.info({ verificationId }, `[Veriff - Verify Outcome] Unhandled decision code: ${verification.code}`);
-    }
+    default: {}
   }
 
   // Update the order tags

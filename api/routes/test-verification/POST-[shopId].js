@@ -44,7 +44,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const { verification } = veriffVerification;
     const { url } = verification;
 
-    logger.info(`Created Veriff verification session: ${verification.id}`);
+    logger.info({ sessionId: verification.id }, 'Created Veriff verification session');
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -73,7 +73,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       testVerificationSent: true,
     });
 
-    logger.info(`Updated shop ${shopId} testVerificationSent to true`);
+    logger.info({ shopId }, 'Shop test verification limit reached');
 
     await reply.send({
       success: true,
