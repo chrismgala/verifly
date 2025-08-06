@@ -27,7 +27,8 @@ export const BillingPage = () => {
         price: true,
         usagePrice: true,
         features: true,
-        visible: true
+        visible: true,
+        available: true
       },
     });
 
@@ -79,6 +80,7 @@ export const BillingPage = () => {
                     usagePrice={plan.usagePrice}
                     frequency="month"
                     visible={plan.visible}
+                    available={plan.available}
                     buttonText={index === 0 ? "Select Plan" : "Coming Soon"}
                   />
               </Layout.Section>

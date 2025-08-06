@@ -7,6 +7,11 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v1",
   storageKey: "cw7smhMvwwHK",
   fields: {
+    available: {
+      type: "boolean",
+      default: false,
+      storageKey: "-VFmryEFfX57",
+    },
     description: { type: "string", storageKey: "jqD1-EpZkL0R" },
     features: {
       type: "enum",
