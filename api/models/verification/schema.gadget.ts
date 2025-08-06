@@ -40,5 +40,11 @@ export const schema: GadgetModel = {
       ],
       storageKey: "gO6__aZR9xf_",
     },
+    test: {
+      type: "boolean",
+      default: false,
+      validations: { required: true },
+      storageKey: "5Ek9fKbe0ykY",
+    },
   },
 };
