@@ -1,5 +1,5 @@
 field on shopifyShop {
   count(verifications, where: (
-    verifications.updatedAt >= now() - interval("30 days")
+    verifications.updatedAt >= now() - interval("30 days") && verifications.test == false
   ))
 }
