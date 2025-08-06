@@ -5,9 +5,8 @@ import {
   ActionOptions, 
   ShopifyShopState 
 } from "gadget-server";
-import { Resend } from 'resend';
 
-import { trialCalculations } from "../../../helpers/trialCalculations";
+import { trialCalculations } from "../../../helpers/util";
 
 /** @type { ActionRun } */
 export const run = async ({ params, record, logger, api, connections }) => {
@@ -113,14 +112,14 @@ export const onSuccess = async ({
         }
       }`,
       {
-        name: "Essential",
+        name: "Watchtower",
         trialDays: 7,
         lineItems: [
           {
             plan: {
               appRecurringPricingDetails: {
                 price: {
-                  amount: 9.00,
+                  amount: 39.00,
                   currencyCode: "USD",
                 },
                 interval: "EVERY_30_DAYS",
@@ -130,7 +129,7 @@ export const onSuccess = async ({
           {
             plan: {
               appUsagePricingDetails: {
-                terms: "$1.00 per verification.",
+                terms: "$0.99 per verification.",
                 cappedAmount: {
                   amount: 100000.00,
                   currencyCode: "USD"
@@ -139,7 +138,7 @@ export const onSuccess = async ({
             }
           }
         ],
-        returnUrl: `${currentAppUrl}finish-payment?shop_id=${connections.shopify.currentShop.id}&plan=essential`,
+        returnUrl: `${currentAppUrl}finish-payment?shop_id=${connections.shopify.currentShop.id}&plan=watchtower`,
       }
     );
 

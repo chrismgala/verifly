@@ -35,9 +35,9 @@ export const run = async ({ params, trigger, logger, api, connections }) => {
     throw new Error(`[ChargeForUsage] - Missing shopify connection`);
   }
 
-  const { monthlyVerificationCount } = shop;
+  const { monthlyVerificationCount, veriflyPlan } = shop;
   
-  const totalUsageCost = parseFloat(monthlyVerificationCount * 1);
+  const totalUsageCost = parseFloat(monthlyVerificationCount * veriflyPlan.usagePrice);
   const currentMonth = new Date().getMonth();
 
   if (totalUsageCost > 0) {
@@ -97,6 +97,13 @@ export const params = {
       },
       verificationsEnabled: {
         type: "boolean",
+      },
+      veriflyPlan: {
+        type: "object",
+        properties: {
+          id: { type: "number" },
+          usagePrice: { type: "number" },
+        },
       },
     },
   }

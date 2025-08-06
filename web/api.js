@@ -4,8 +4,20 @@ import { Client } from "@gadget-client/verifly";
 
 export const api = new Client({ environment: window.gadgetConfig.environment });
 
+/**
+ * Capitalizes the first letter of each segment in a hyphen-separated string and removes the hyphens.
+ * Example: 'fort-knox' => 'Fort Knox'
+ * @param {string} str - The input string to capitalize and join.
+ * @returns {string} The capitalized, joined string.
+ */
 export const capitalizeString = (str) => {
-  return String(str).charAt(0).toUpperCase() + String(str).slice(1);
+  if (str == null) {
+    return '';
+  }
+  return String(str)
+    .split('-')
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
 };
 
 export const getDaysUntilTimestamp = (date, daysOffset = 0) => {

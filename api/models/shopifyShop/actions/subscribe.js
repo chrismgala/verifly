@@ -5,26 +5,8 @@ import {
   ActionOptions,
 } from "gadget-server";
 
-import { trialCalculations } from "../../../helpers/trialCalculations";
-
-const PLANS = {
-  essential: {
-    id: 1,
-    price: 9,
-  },
-  pro: {
-    id: 2,
-    price: 29,
-  },
-  max: {
-    id: 3,
-    price: 49,
-  },
-};
-
-const capitalizeString = (str) => {
-  return String(str).charAt(0).toUpperCase() + String(str).slice(1);
-};
+import { plans } from "../../../helpers/plans";
+import { trialCalculations, capitalizeString } from "../../../helpers/util";
 
 /** @type { ActionRun } */
 export const run = async ({ 
@@ -38,11 +20,11 @@ export const run = async ({
   applyParams(params, record);
   await preventCrossShopDataAccess(params, record);
 
-  // Get the plan object from the list of available plans
   const planName = params.plan;
-  const plan = PLANS[planName];
+  const plan = plans[planName];
   let planFromDatabase;
-  if (!plan) throw new Error(`[Subscribe] - Plan ${planName} does not exist`);
+
+  if (!plan) throw new Error(`[Subscribe] - Plan '${planName} does not exist`);
 
   // Get an instance of the shopify-api-node API client for this shop
   const shopify = connections.shopify.current;
@@ -114,7 +96,7 @@ export const run = async ({
         {
           plan: {
             appUsagePricingDetails: {
-              terms: "$1.00 per verification.",
+              terms: `$${plan.usagePrice} per verification.`,
               cappedAmount: {
                 amount: planFromDatabase.usageCap.toFixed(2),
                 currencyCode: "USD"

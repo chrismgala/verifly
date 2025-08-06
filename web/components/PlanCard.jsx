@@ -19,6 +19,7 @@ export const PlanCard = ({
   title, 
   description, 
   price, 
+  usagePrice,
   features,
   featuredText,
   frequency,
@@ -73,7 +74,9 @@ export const PlanCard = ({
 
           <InlineStack blockAlign="end" gap="100" align="start">
             <Box paddingBlockEnd="200">
-              <Text variant="bodySm">+ $1.00 per verification</Text>
+              <Text variant="bodySm">
+                {usagePrice ? `+ $${usagePrice} per verification` : 'Contact us for pricing'}
+                </Text>
             </Box>
           </InlineStack>
 

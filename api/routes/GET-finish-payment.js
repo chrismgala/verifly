@@ -1,19 +1,6 @@
 import { RouteHandler } from "gadget-server";
 
-const PLANS = {
-  essential: {
-    id: 1,
-    price: 9,
-  },
-  pro: {
-    id: 2,
-    price: 29,
-  },
-  max: {
-    id: 3,
-    price: 49,
-  },
-};
+import { plans } from "../helpers/plans";
 
 /** @type { RouteHandler<{ Querystring: { shop_id: string, charge_id: string; }; }> }*/
 const route = async ({ request, reply, api, logger, connections }) => {
@@ -48,7 +35,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
   // Example: mark the shop as paid by setting a `plan` attribute, this may vary for your billing model
   await api.shopifyShop.update(request.query.shop_id, {
     veriflyPlan: {
-      _link: PLANS[request.query.plan].id
+      _link: plans[request.query.plan].id
     }
   });
 

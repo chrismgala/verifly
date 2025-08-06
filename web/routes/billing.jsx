@@ -25,6 +25,7 @@ export const BillingPage = () => {
         id: true,
         name: true,
         price: true,
+        usagePrice: true,
         features: true,
         visible: true
       },
@@ -75,6 +76,7 @@ export const BillingPage = () => {
                     description={plan.description}
                     features={plan.features}
                     price={plan.price}
+                    usagePrice={plan.usagePrice}
                     frequency="month"
                     visible={plan.visible}
                     buttonText={index === 0 ? "Select Plan" : "Coming Soon"}

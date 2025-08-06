@@ -1,4 +1,4 @@
-import { getDaysUntilTimestamp } from "../helpers/trialCalculations";
+import { getDaysUntilTimestamp } from "../helpers/util";
 
 const TRIAL_LENGTH_IN_DAYS = 7;
 
@@ -20,7 +20,11 @@ export const run = async ({ trigger, logger, api }) => {
       activeRecurringSubscriptionId: true,
       activeUsageSubscriptionLineItemId: true,
       monthlyVerificationCount: true,
-      verificationsEnabled: true
+      verificationsEnabled: true,
+      veriflyPlan: {
+        id: true,
+        usagePrice: true,
+      },
     },
     first: 250,
   });
@@ -52,7 +56,11 @@ export const run = async ({ trigger, logger, api }) => {
               activeRecurringSubscriptionId: shop.activeRecurringSubscriptionId,
               activeUsageSubscriptionLineItemId: shop.activeUsageSubscriptionLineItemId,
               monthlyVerificationCount: shop.monthlyVerificationCount,
-              verificationsEnabled: shop.verificationsEnabled
+              verificationsEnabled: shop.verificationsEnabled,
+              veriflyPlan: {
+                id: shop.veriflyPlan.id,
+                usagePrice: shop.veriflyPlan.usagePrice,
+              }
             } 
           },
           {
