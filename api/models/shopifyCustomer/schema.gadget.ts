@@ -19,8 +19,8 @@ export const schema: GadgetModel = {
       acceptUnlistedOptions: false,
       options: [
         "approved",
-        "denied",
-        "resubmit",
+        "declined",
+        "resubmission_request",
         "expired",
         "abandoned",
         "unverified",

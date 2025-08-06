@@ -33,7 +33,7 @@ export const schema: GadgetModel = {
       options: [
         "approved",
         "declined",
-        "resubmit",
+        "resubmission_request",
         "expired",
         "pending",
         "abandoned",
