@@ -36,15 +36,29 @@ const route = async ({ request, reply, api, logger, connections }) => {
   const internalVerification = await api.verification.findById(verificationId);
 
   const shopId = internalVerification.shopId;
+  let customer, order;
   
-  const customer = await api.shopifyCustomer.findFirst({
-    filter: {
-      platformCustomerId: {
-        equals: parseFloat(internalVerification.customerId)
+  // Test verifications don't have a customer or order, so we don't need to update them
+  if (!internalVerification.test) {
+    customer = await api.shopifyCustomer.findFirst({
+      filter: {
+        platformCustomerId: {
+          equals: parseFloat(internalVerification.customerId)
+        }
       }
+    });
+    order = await api.shopifyOrder.findById(internalVerification.orderId);
+
+    try {
+      await api.shopifyCustomer.update(customer.id, {
+        status: verification.decision
+      });
+      logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
+    } catch (error) {
+      logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
+      return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
     }
-  });
-  const order = await api.shopifyOrder.findById(internalVerification.orderId);
+  }
 
   try {
     await api.verification.update(internalVerification.id, {
@@ -56,16 +70,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
     return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
   }
-
-  try {
-    await api.shopifyCustomer.update(customer.id, {
-      status: verification.decision
-    });
-    logger.info({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Customer status updated`);
-  } catch (error) {
-    logger.error({ customerId: customer.platformCustomerId }, `[Veriff - Verify Outcome] Unable to update customer status`);
-    return reply.code(500).send({error: `Unable to update customer status: ${error.message}`});
-  }
+  
 
   switch (verification.decision) {
     case 'approved': {
@@ -86,35 +91,37 @@ const route = async ({ request, reply, api, logger, connections }) => {
     default: {}
   }
 
-  // Update the order tags
-  try {
-    const shopify = await connections.shopify.forShopId(shopId);
-    if (!shopify) {
-      throw new Error("[Veriff - Verify Outcome] Missing Shopify connection");
-    }
-
-    const result = await shopify.graphql(
-      `mutation ($id: ID!, $tags: [String!]!) {
-        tagsAdd(id: $id, tags: $tags) {
-          node {
-            id
-          }
-          userErrors {
-            message
-          }
-        }
-      }`,
-      {
-        id: `gid://shopify/Order/${order.id}`,
-        tags: ["Verifly Verified"]
+  // Update the order tags if it's not a test verification
+  if (!internalVerification.test) {
+    try {
+      const shopify = await connections.shopify.forShopId(shopId);
+      if (!shopify) {
+        throw new Error("[Veriff - Verify Outcome] Missing Shopify connection");
       }
-    );
 
-    logger.info({ result }, '[Veriff - Verify Outcome] Order tags updated successfully');
+      const result = await shopify.graphql(
+        `mutation ($id: ID!, $tags: [String!]!) {
+          tagsAdd(id: $id, tags: $tags) {
+            node {
+              id
+            }
+            userErrors {
+              message
+            }
+          }
+        }`,
+        {
+          id: `gid://shopify/Order/${order.id}`,
+          tags: ["Verifly Verified"]
+        }
+      );
 
-  } catch (error) {
-    logger.error({ error, orderId: order.id }, '[Veriff - Verify Outcome] Order tags update failed');
-    return reply.code(500).send({error: `Order tags update failed: ${error.message}`});
+      logger.info({ result }, '[Veriff - Verify Outcome] Order tags updated successfully');
+
+    } catch (error) {
+      logger.error({ error, orderId: order.id }, '[Veriff - Verify Outcome] Order tags update failed');
+      return reply.code(500).send({error: `Order tags update failed: ${error.message}`});
+    }
   }
 }
 

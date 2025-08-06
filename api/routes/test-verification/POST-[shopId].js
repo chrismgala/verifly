@@ -75,6 +75,16 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     logger.info({ shopId }, 'Shop test verification limit reached');
 
+    await api.verification.create({
+      sessionId: verification.id,
+      status: 'pending',
+      shop: {
+        _link: shopId,
+      },
+      emailId: data?.id,
+      test: true,
+    });
+
     await reply.send({
       success: true,
       message: "Test verification sent successfully",
@@ -82,7 +92,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     });
 
   } catch (error) {
-    logger.error(`Error sending test verification: ${error.message}`, { error });
+    logger.error(`Error sending or creating test verification: ${error.message}`, { error });
     
     await reply.code(500).send({
       error: "Failed to send test verification",
