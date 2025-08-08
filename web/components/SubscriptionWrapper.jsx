@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import { Banner, Page } from "@shopify/polaris";
 
 import { FullPageSpinner } from "./FullPageSpinner";
-import { getDaysUntilTimestamp, api } from "../api";
+import { getDaysUntilTimestamp, api } from "../util";
 
 const TRIAL_LENGTH_IN_DAYS = 7;
 

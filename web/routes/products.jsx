@@ -140,7 +140,7 @@ export const ProductsPage = () => {
     }
 
     setHasChanges(false);
-  }, [updateData, updating]);
+  }, [updateData, updateError]);
 
   useEffect(() => {
     console.dir(fetchingProducts);

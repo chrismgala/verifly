@@ -12,7 +12,8 @@ import {
 } from "@shopify/polaris";
 import { AutoButton } from "@gadgetinc/react/auto/polaris";
 
-import { capitalizeString, api } from "../api";
+import { api } from "../api";
+import { capitalizeString } from "../util";
 
 export const PlanCard = ({ 
   id,
@@ -54,7 +55,7 @@ export const PlanCard = ({
           <BlockStack gap="400">
             <BlockStack gap="200" align="start">
               <Text as="h3" variant="headingLg">
-                {capitalizeString(title)}
+                {capitalizeString(title, true)}
               </Text>
 
               {description ? (
