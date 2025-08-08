@@ -72,7 +72,6 @@ const route = async ({ request, reply, api, logger, connections }) => {
             handle: shopifyProduct.handle,
             status: shopifyProduct.status,
             tags: shopifyProduct.tags,
-            needsVerification: false,
             shop: {
               _link: shopId
             }
