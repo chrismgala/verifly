@@ -1,8 +1,11 @@
 import { RouteHandler } from "gadget-server";
 
-import { getSessionMedia, getSessionDecision, getSessionImage } from "../../../helpers/veriff";
-
-const EXCLUDED_DOCUMENT_NAMES = ['face-pre', 'document-front-pre', 'document-back-pre'];
+import { 
+  getSessionMedia, 
+  getSessionDecision, 
+  getSessionImage,
+  EXCLUDED_DOCUMENT_NAMES
+} from "../../../helpers/veriff";
 
 /**
  * Route handler for order verifications
@@ -44,6 +47,8 @@ const route = async ({ request, reply, api, logger, connections }) => {
         rawImages.push(dataUrl);
       }
     }
+
+    logger.info({ shopId, sessionId: internalVerification.sessionId }, 'Order verification results retrieved from Veriff');
 
     return reply.code(200).send({
       acceptanceTime: internalVerification.updatedAt,

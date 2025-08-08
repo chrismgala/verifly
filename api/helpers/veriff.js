@@ -1,5 +1,7 @@
 const crypto = require("crypto");
 
+export const EXCLUDED_DOCUMENT_NAMES = ['face-pre', 'document-front-pre', 'document-back-pre'];
+
 export const createVerificationSession = async (payload) => {
   try {
     const headers = {
