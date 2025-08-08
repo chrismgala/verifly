@@ -26,7 +26,7 @@ import { VerificationsPage } from "../routes/verifications";
 import { VerificationPage } from "../routes/verification";
 import { ProductsPage } from "../routes/products";
 import { SettingsPage } from "../routes/settings";
-import { TestPage } from "../routes/test";
+import { TestVerificationPage } from "../routes/test-verification";
 
 import { FullPageError } from "../components/FullPageError";
 import { FullPageSpinner } from "../components/FullPageSpinner";
@@ -62,7 +62,7 @@ function App() {
         <Route path="verifications" element={<VerificationsPage />} />
         <Route path="verification/:id/:sessionId" element={<VerificationPage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route path="test" element={<TestPage />} />
+        <Route path="test-verification" element={<TestVerificationPage />} />
         <Route path="billing" element={<BillingPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<Error404 />} />
@@ -153,19 +153,19 @@ function EmbeddedApp() {
           Shop Information
         </Link>
         <Link to="/verifications" rel="verifications">
-          Verifications
+          🔐 Verifications
         </Link>
         <Link to="/products" rel="products">
-          Products
+          🛍️ Products
         </Link>
-        <Link to="/test" rel="test-verification">
-          Test
+        <Link to="/test-verification" rel="test-verification">
+          🧪 Test Verification
         </Link>
         <Link to="/billing" rel="billing">
-          Billing
+          🏦 Billing
         </Link>
         <Link to="/settings" rel="settings">
-          Settings
+          ⚙️ Settings
         </Link>
       </NavMenu>
     </>

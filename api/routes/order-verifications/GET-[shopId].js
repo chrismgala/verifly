@@ -12,6 +12,9 @@ const route = async ({ request, reply, api, logger, connections }) => {
     filter: {
       shopId: {
         equals: request.params.shopId
+      },
+      test: {
+        equals: false
       }
     }
   });
