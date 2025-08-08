@@ -3,10 +3,6 @@
   height: 44px;
 }
 
-.Polaris-IndexFilters__ActionWrap {
-  display: none;
-}
-
 .Polaris-Grid {
   display: flex;
   justify-content: space-between;
@@ -14,15 +10,28 @@
   margin-bottom: 2rem;
 }
 
-.Polaris-CalloutCard__Image {
-  width: 12rem;
-}
-
 .Polaris-Box {
   min-height: initial;
+}
+
+.Polaris-DataTable__Table {
+  font-size: .8125rem;
+}
+
+.Polaris-IndexFilters__ActionWrap {
+  display: none;
+}
+
+.Polaris-CalloutCard__Image {
+  width: 12rem;
 }
 
 input:disabled,
 .Polaris-Button--disabled {
   cursor: not-allowed;
+}
+
+/* Crisp chat override */
+.crisp-client .cc-1brb6 .cc-1yy0g .cc-1m2mf .cc-157aw {
+  background-color: #ed733e !important;
 }
