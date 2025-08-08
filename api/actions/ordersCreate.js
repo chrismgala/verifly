@@ -120,7 +120,7 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       'Customer';
     const customerEmail = customer?.email;
 
-    const productsNeedingVerification = await api.shopifyProduct.findMany({
+    const variantsNeedingVerification = await api.shopifyProductVariant.findMany({
       filter: {
         shopId: {
           equals: shopId
@@ -133,9 +133,15 @@ export const onSuccess = async ({ trigger, logger, api }) => {
         id: true
       }
     });
-
-    const productIdsFromOrder = order.line_items.map(lineItem => lineItem.product_id);
-    const productsToVerify = productsNeedingVerification.filter(product => productIdsFromOrder.includes(parseFloat(product.id)));
+    
+    const variantIdsFromOrder = order.line_items
+      .map((lineItem) => lineItem.variant_id)
+      .filter((id) => id != null);
+    
+    const variantsToVerify = variantsNeedingVerification.filter((variant) => {
+      const idNum = typeof variant.id === 'string' ? parseFloat(variant.id) : variant.id;
+      return variantIdsFromOrder.includes(idNum);
+    });
 
     logger.info(
       {
@@ -180,10 +186,10 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       return;
     }
 
-    if (productsToVerify.length === 0) {
+    if (variantsToVerify.length === 0) {
       logger.warn(
-        { orderId: order.id, customerEmail, productsNeedingVerification, productIdsFromOrder },
-        "Abort verification email - no products need verification"
+        { orderId: order.id, customerEmail, variantsNeedingVerification, variantIdsFromOrder },
+        'Abort verification email - no variants need verification'
       );
       return;
     }
