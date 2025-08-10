@@ -81,7 +81,7 @@ export const BillingPage = () => {
                     frequency="month"
                     visible={plan.visible}
                     available={plan.available}
-                    buttonText={index === 0 ? "Select Plan" : "Coming Soon"}
+                    buttonText={index === 0 ? "Select Plan" : "Contact Us"}
                   />
               </Layout.Section>
             ))
