@@ -78,10 +78,6 @@ export const TestVerificationPage = () => {
     <Page 
       title="Test Verification" 
       subtitle="Each shop is allowed to send 1 test verification to whomever. If the form is disabled, it means you haven't activated your trial or you've used your test verification."
-      backAction={{
-        content: "Products",
-        onAction: () => navigate("/products"),
-      }}
       primaryAction={{
         content: "View Results",
         onAction: getResults,

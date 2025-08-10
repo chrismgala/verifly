@@ -53,10 +53,6 @@ export const BillingPage = () => {
   return (
     <Page
       title="Billing"
-      backAction={{
-        content: "Shop Information",
-        onAction: () => navigate("/"),
-      }}
     >
       <BlockStack gap="500">
         {showErrorBanner && (

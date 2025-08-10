@@ -150,10 +150,6 @@ export const ProductsPage = () => {
     <Page
       title="Products"
       subtitle="If you don't see a product here, it needs to be active. Check its status in the Shopify Admin > Products."
-      backAction={{
-        content: "Shop Information",
-        onAction: () => navigate("/"),
-      }}
     >
       <SaveBar id="products-save-bar">
         <button variant="primary" onClick={handleSave} disabled={updating}>

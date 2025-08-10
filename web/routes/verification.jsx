@@ -206,10 +206,6 @@ export const VerificationPage = () => {
           `,
         },
       ]}
-      backAction={{
-        content: "Verifications",
-        onAction: () => navigate("/verifications"),
-      }}
     >
       <BlockStack gap="400">
         <Card>

@@ -59,10 +59,6 @@ export const SettingsPage = () => {
   return (
     <Page
       title="Settings"
-      backAction={{
-        content: "Shop Information",
-        onAction: () => navigate("/"),
-      }}
     >
       <SaveBar id="my-save-bar">
         <button variant="primary" onClick={handleSave}></button>

@@ -4,6 +4,8 @@ import { useFetch } from "@gadgetinc/react";
 
 import {
   Page,
+  Banner,
+  Layout,
   Badge,
   Text,
   IndexTable,
@@ -20,7 +22,9 @@ import { FullPageSpinner } from "../components/FullPageSpinner";
 export const VerificationsPage = () => {
   // Initial setup
   const navigate = useNavigate();
-  const { shopId } = useOutletContext();
+  const { shopId, shop } = useOutletContext();
+
+  const isTrialActivated = shop?.confirmationUrl && shop?.veriflyPlan;
 
   // Data fetching
   const [{ data, fetching, error }] = useFetch(`/order-verifications/${shopId}`, { 
@@ -123,81 +127,95 @@ export const VerificationsPage = () => {
     <Page
       title="Verifications"
       subtitle="Click on the order number to view the customer's verification details"
-      backAction={{
-        content: "Shop Information",
-        onAction: () => navigate("/"),
-      }}
     >
-      <Card>
-        <IndexFilters
-          tabs={tabs}
-          selected={selected}
-          onSelect={setSelected}
-          canCreateNewView={false}
-          mode={mode}
-          setMode={setMode}
-        />
-
-        <IndexTable
-          itemCount={verifications?.length || 0}
-          selectedItemsCount={
-            allResourcesSelected ? 'All' : selectedResources.length
-          }
-          onSelectionChange={handleSelectionChange}
-          headings={[
-            {title: 'Order'},
-            {title: 'Customer'},
-            {title: 'Status'},
-            {title: 'Last updated'},
-          ]}
-          emptyState={emptyStateMarkup}
-          promotedBulkActions={bulkActions}
-        >
-          {verifications && verifications.map(
-            (
-              { orderName, customer, updatedAt, id, sessionId },
-              index,
-            ) => (
-              <IndexTable.Row
-                id={index}
-                key={index}
-                selected={selectedResources.includes(index)}
-                position={index}
-              >
-                <IndexTable.Cell>
-                  {customer.status === 'approved' ? (
-                    <Link to={`/verification/${id}/${sessionId}`}>
-                      <Text variant="bodyMd" fontWeight="bold" as="span">
-                        {orderName}
-                      </Text>
-                    </Link>
-                  ) : (
-                    <Text variant="bodyMd" as="span">
-                      {orderName}
-                    </Text>
-                  )}
-                </IndexTable.Cell>
-
-                <IndexTable.Cell>
-                  <Text variant="bodyMd" as="span">
-                    {customer.email}
-                  </Text>
-                </IndexTable.Cell>
-                
-                <IndexTable.Cell>
-                  {displayVerificationBadge(customer.status)}
-                </IndexTable.Cell>
-                
-                <IndexTable.Cell>
-                  <Text variant="bodyMd" as="span">
-                    {new Date(updatedAt).toLocaleString()}
-                  </Text>
-                </IndexTable.Cell>
-              </IndexTable.Row>
-            ),
+      <Layout>
+        <Layout.Section>
+          {!isTrialActivated && (
+            <Banner 
+              title="Your trial needs to be activated"
+              tone="warning"
+              action={{ content: 'Activate trial', url: shop?.confirmationUrl }}
+            >
+              <Text as="p" variant="bodyMd">
+                Activating your free trial will allow you to see the results of your customers' verifications.
+              </Text>
+            </Banner>
           )}
-        </IndexTable>
-      </Card>
+        </Layout.Section>
+
+        <Layout.Section>
+          <Card>
+            <IndexFilters
+              tabs={tabs}
+              selected={selected}
+              onSelect={setSelected}
+              canCreateNewView={false}
+              mode={mode}
+              setMode={setMode}
+            />
+
+            <IndexTable
+              itemCount={verifications?.length || 0}
+              selectedItemsCount={
+                allResourcesSelected ? 'All' : selectedResources.length
+              }
+              onSelectionChange={handleSelectionChange}
+              headings={[
+                {title: 'Order'},
+                {title: 'Customer'},
+                {title: 'Status'},
+                {title: 'Last updated'},
+              ]}
+              emptyState={emptyStateMarkup}
+              promotedBulkActions={bulkActions}
+            >
+              {verifications && verifications.map(
+                (
+                  { orderName, customer, updatedAt, id, sessionId },
+                  index,
+                ) => (
+                  <IndexTable.Row
+                    id={index}
+                    key={index}
+                    selected={selectedResources.includes(index)}
+                    position={index}
+                  >
+                    <IndexTable.Cell>
+                      {customer.status === 'approved' ? (
+                        <Link to={`/verification/${id}/${sessionId}`}>
+                          <Text variant="bodyMd" fontWeight="bold" as="span">
+                            {orderName}
+                          </Text>
+                        </Link>
+                      ) : (
+                        <Text variant="bodyMd" as="span">
+                          {orderName}
+                        </Text>
+                      )}
+                    </IndexTable.Cell>
+
+                    <IndexTable.Cell>
+                      <Text variant="bodyMd" as="span">
+                        {customer.email}
+                      </Text>
+                    </IndexTable.Cell>
+                    
+                    <IndexTable.Cell>
+                      {displayVerificationBadge(customer.status)}
+                    </IndexTable.Cell>
+                    
+                    <IndexTable.Cell>
+                      <Text variant="bodyMd" as="span">
+                        {new Date(updatedAt).toLocaleString()}
+                      </Text>
+                    </IndexTable.Cell>
+                  </IndexTable.Row>
+                ),
+              )}
+            </IndexTable>
+          </Card>
+        </Layout.Section>
+      </Layout>
     </Page>
   );
 }
