@@ -1,28 +1,60 @@
-import { useState, useEffect } from "react";
-import { useOutletContext, useParams, useNavigate } from "react-router";
-import { Modal, TitleBar, useAppBridge } from '@shopify/app-bridge-react';
+import { useState, useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router";
 import { useFetch } from "@gadgetinc/react";
 
 import { 
-  Page, 
-  BlockStack, 
-  Card, 
+  Page,
+  BlockStack,
+  Card,
+  DataTable, 
   Text, 
-  Button,
-  SkeletonBodyText
+  ProgressBar,
+  Spinner,
 } from "@shopify/polaris";
+import { InfoIcon } from '@shopify/polaris-icons';
+
 
 import { FullPageError } from "../components/FullPageError";
 import { displayVerificationBadge } from "./verifications";
+import { capitalizeString, normalizeCamelCase } from "../util";
+
+const INSIGHTS_MAP = {
+  document: {
+    documentAccepted: 'The presented document is accepted in the integration and the session can proceed with further validation checks.',
+    documentFrontImageAvailable: 'The image of the front of the document is present and can be used for the verification.',
+    documentFrontFullyVisible: 'The image of front of the document fully visible.',
+    documentBackImageAvailable: 'The image of the back of the document is present and can be used for the verification.',
+    documentBackFullyVisible: 'The image of back of the document fully visible.',
+    documentImageQualitySufficient: 'The document image meets the image quality requirements for verification.',
+    validDocumentAppearance: 'The presented document\'s appearance corresponds with how a valid document should appear.',
+    physicalDocumentPresent: 'The presented document is real and exists in the physical original form.',
+    documentRecognised: 'The presented identity document has successfully been recognized and the session can proceed with futher validation checks.',
+    documentNotExpired: 'The presented document has not expired and can be used for verification.',
+  },
+  biometric: {
+    faceSimilarToPortrait: 'The face in selfie matches the face in the document photo.',
+    faceNotInBlocklist: 'The face from the selfie is not on a face blocklist.',
+    faceLiveness: 'The selfie is of a real face that is physically present during the verification session.',
+    faceImageAvailable: 'The face image from the selfie is available for verification and can proceed with the face related checks.',
+    faceImageQualitySufficient: 'The face image from the selfie meets the image quality requirements for verification.',
+  },
+  fraud: {
+    allowedIpLocation: 'The user\'s device IP address is not from a restricted area and is therefore accepted.',
+    expectedTrafficBehaviour: 'The user and session behavior do not appear to be suspicious or as being part of a repetitive pattern related to fraud.',
+  },
+}
+
+const CONFIDENCE_LEVEL_MAP = {
+  high: '🟢',
+  medium: '🟡',
+  low: '🔴',
+}
 
 export const VerificationPage = () => {
-  const { shopId } = useOutletContext();
   const { id, sessionId } = useParams();
 
   const navigate = useNavigate();
-  const shopify = useAppBridge();
 
-  // Local state for immediate UI updates
   const [localVerificationStatus, setLocalVerificationStatus] = useState(null);
   const [isOverriding, setIsOverriding] = useState(false);
 
@@ -40,11 +72,72 @@ export const VerificationPage = () => {
     }
   });
 
+  // Process and transform data from Veriff
   const person = data?.person;
   const document = data?.document;
+  const insights = data?.insights;
   const rawImages = data?.rawImages;
   const acceptanceTime = data?.acceptanceTime;
+  const decisionScore = data?.decisionScore;
   const internalVerification = data?.internalVerification;
+
+  // Transform person data into rows - use useMemo instead of useEffect
+  const personalInfoRows = useMemo(() => {
+    if (!person) return [];
+    
+    const rows = [];
+    for (const detail in person) {
+      if (person[detail] && person[detail].value) {
+        rows.push([
+          normalizeCamelCase(detail),
+          person[detail].value,
+          CONFIDENCE_LEVEL_MAP[person[detail].confidenceCategory],
+          person[detail].sources.join(', ')
+        ]);
+      }
+    }
+
+    rows.sort((a, b) => a[0].localeCompare(b[0]));
+
+    return rows;
+  }, [person]);
+
+  const documentInfoRows = useMemo(() => {
+    if (!document) return [];
+    
+    const rows = [];
+    for (const detail in document) {
+      if (document[detail] && document[detail].value) {
+        rows.push([
+          normalizeCamelCase(detail),
+          ...(detail === 'type' ? [normalizeDocumentType(document[detail].value)] : [document[detail].value]),
+          CONFIDENCE_LEVEL_MAP[document[detail].confidenceCategory],
+          ...document[detail].sources ? [document[detail].sources.join(', ')] : ['']
+        ]);
+      }
+    }
+
+    rows.sort((a, b) => a[0].localeCompare(b[0]));
+
+    return rows;
+  }, [document]);
+
+  const insightsRows = useMemo(() => {
+    if (!insights) return [];
+    
+    const rows = [];
+    for (const insight of insights) {
+      rows.push([
+        capitalizeString(insight.category),
+        INSIGHTS_MAP[insight.category][insight.label], 
+        insight.result === 'yes' ? '✅' : '❌'
+      ]);
+    }
+
+    rows.sort((a, b) => a[0].localeCompare(b[0]));
+
+    return rows;
+  }, [insights]);
 
   // Initialize local state when data is loaded
   useEffect(() => {
@@ -94,112 +187,143 @@ export const VerificationPage = () => {
     <Page
       title="Verification"
       titleMetadata={displayVerificationBadge(currentStatus)}
+      subtitle={`Completion date: ${acceptanceTime ? new Date(acceptanceTime).toString() : 'calculating...'}`}
       primaryAction={!isVerified ? { 
         content: 'Approve', 
         onAction: overrideVerification,
         loading: isLoading
       } : null}
+      secondaryActions={[
+        {
+          content: '',
+          icon: InfoIcon,
+          disabled: true,
+          helpText: `
+            VIZ = Visual Inspection Zone, the printed data outside the MRZ. 
+            MRZ = Machine Readable Zone, the encoded machine-readable lines containing document holder\'s data and forgery detection numbers. 
+            BARCODE = Barcode, which includes formats like QR codes.
+            NFC = Near Field Communication, which is a microchip in the document.
+          `,
+        },
+      ]}
       backAction={{
-        content: "Verification",
+        content: "Verifications",
         onAction: () => navigate("/verifications"),
       }}
     >
-      <Card>
-        <BlockStack gap="400">
-          <BlockStack gap="200">
-            <Text as="h2" variant="headingSm">
-              Customer
-            </Text>
+      <BlockStack gap="400">
+        <Card>
+          <Text as="h2" variant="headingSm">
+            Personal Information
+          </Text>
 
-            {fetching ? (
-              <SkeletonBodyText lines={1} />
-            ) : (
-              <Text as="p" variant="bodyMd">
-                {person?.firstName?.value} {person?.lastName?.value}
-              </Text>
-            )}
-          </BlockStack>
-
-          <BlockStack gap="200">
-            <Text as="h2" variant="headingSm">
-              Address
-            </Text>
-
-            {fetching ? (
-              <BlockStack gap="200">
-                <SkeletonBodyText lines={1} />
-                <SkeletonBodyText lines={1} />
-              </BlockStack>
-            ) : (
-              <div>
-                <Text as="p" variant="bodyMd">
-                  {person?.address?.components?.houseNumber} {person?.address?.components?.road}
-                </Text>
-                {person?.address?.components?.unit && (
-                  <Text as="p" variant="bodyMd">
-                    {person?.address?.components?.unit}
-                  </Text>
-                )}
-                <Text as="p" variant="bodyMd">
-                  {person?.address?.components?.city}, {person?.address?.components?.state} {person?.address?.components?.postcode}
-                </Text>
-              </div>
-            )}
-          </BlockStack>
-
-          <BlockStack gap="200">
-            <Text as="h2" variant="headingSm">
-              Document Type
-            </Text>
-
-            {fetching ? (
-              <SkeletonBodyText lines={1} />
-            ) : (
-              <div>
-                <Text as="p" variant="bodyMd">
-                  {document?.type?.value === 'drivers_license' && 'Driver\'s License'}
-                  {document?.type?.value === 'passport' && 'Passport'}
-                  {document?.type?.value === 'id_card' && 'ID Card'}
-                  {document?.type?.value === 'residence_permit' && 'Residence Permit'}
-                  {document?.type?.value === 'other' && 'Other'}
-                </Text>
-              </div>
-            )}
-          </BlockStack>
-
-          <BlockStack gap="200">
-            <Text as="h2" variant="headingSm">
-              Verification Date
-            </Text>
-
-            {fetching ? (
-              <SkeletonBodyText lines={1} />
-            ) : (
-              <div>
-                <Text as="p" variant="bodyMd">
-                  {new Date(acceptanceTime).toLocaleString()}
-                </Text>
-              </div>
-            )}
-          </BlockStack>
-
-          {!fetching && (
-            <Button onClick={() => shopify.modal.show('verification-document-images')}>View Verification Images</Button>
+          {fetching ? (
+            <Spinner size="large" />
+          ) : (
+            <DataTable
+              columnContentTypes={[
+                'text',
+                'text',
+                'text',
+                'text',
+              ]}
+              headings={[
+                'Field',
+                'Data Extracted',
+                'Confidence Level',
+                'Sources',
+              ]}
+              rows={personalInfoRows}
+            />
           )}
-        </BlockStack>
-      </Card>
+        </Card>
 
-      <Modal id="verification-document-images">
-        <TitleBar title="Verification Images">
-          <button onClick={() => shopify.modal.hide('verification-document-images')}>Close</button>
-        </TitleBar>
+        <Card>
+          <Text as="h2" variant="headingSm">
+            Document Information
+          </Text>
 
-        <div>
-          {rawImages?.map((image, index) => (
-            <img key={index} src={image} />
-          ))}
-        </div>
-      </Modal>
+          {fetching ? (
+            <Spinner size="large" />
+          ) : (
+            <DataTable
+              columnContentTypes={[
+                'text',
+                'text',
+                'text',
+                'text',
+              ]}
+              headings={[
+                'Field',
+                'Data Extracted',
+                'Confidence Level',
+                'Sources',
+              ]}
+              rows={documentInfoRows}
+            />
+          )}
+        </Card>
+
+        <Card>
+          <Text as="h2" variant="headingSm">
+            Verification Insights
+          </Text>
+
+          {fetching ? (
+            <Spinner size="large" />
+          ) : (
+            <>
+              <div style={{ width: '25%', margin: '16px 0' }}>
+                <Text as="h2" variant="headingSm">
+                  Decision Score: {decisionScore * 100} / 100
+                </Text>
+
+                <ProgressBar 
+                  progress={Math.round(decisionScore * 100)} 
+                  tone={decisionScore > 0.5 ? "success" : "critical"} 
+                />
+              </div>
+
+              <DataTable
+                columnContentTypes={[
+                  'text',
+                  'text',
+                  'text',
+                ]}
+                headings={[
+                  'Category',
+                  'Insight',
+                  'Result'
+                ]}
+                rows={insightsRows}
+              />
+            </>
+          )}
+        </Card>
+
+        <Card>
+          <Text as="h2" variant="headingSm">
+            Verification Images
+          </Text>
+
+          <div>
+            {rawImages?.map((image, index) => (
+              <img key={index} src={image} style={{ margin: '16px 0' }} />
+            ))}
+          </div>
+        </Card>
+      </BlockStack>
     </Page>
   );
+}
+
+const normalizeDocumentType = (type) => {
+  switch (type) {
+    case 'drivers_license': return 'Driver\'s License';
+    case 'passport': return 'Passport';
+    case 'id_card': return 'ID Card';
+    case 'residence_permit': return 'Residence Permit';
+    case 'other': return 'Other';
+    default: return 'Unknown Document';
+  }
 }

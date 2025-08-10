@@ -32,7 +32,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const veriffSessionDecision = await getSessionDecision(internalVerification.sessionId);
 
     const { images } = veriffSessionMedia;
-    const { person, document } = veriffSessionDecision;
+    const { person, document, insights, decisionScore } = veriffSessionDecision;
 
     let rawImages = [];
 
@@ -48,13 +48,15 @@ const route = async ({ request, reply, api, logger, connections }) => {
       }
     }
 
-    logger.info({ shopId, sessionId: internalVerification.sessionId }, 'Order verification results retrieved from Veriff');
+    logger.info({ shopId: internalVerification.shopId, sessionId: internalVerification.sessionId }, 'Order verification results retrieved from Veriff');
 
     return reply.code(200).send({
-      acceptanceTime: internalVerification.updatedAt,
       person,
       document,
+      insights,
       rawImages,
+      acceptanceTime: internalVerification.updatedAt,
+      decisionScore,
       internalVerification
      });
   } catch (error) {
