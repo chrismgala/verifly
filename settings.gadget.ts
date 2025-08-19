@@ -22,6 +22,7 @@ export const settings: GadgetSettings = {
           "read_orders",
           "read_products",
           "write_orders",
+          "write_app_proxy",
         ],
       },
     },

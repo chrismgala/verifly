@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useOutletContext } from "react-router";
+import { useState, useEffect, useCallback } from 'react';
+import { useOutletContext } from "react-router";
 import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
 import { useFetch } from "@gadgetinc/react";
 
@@ -10,13 +10,13 @@ import {
   Grid,
   Layout,
   Text,
-  TextField
+  TextField,
+  Select
 } from "@shopify/polaris";
 
 import { Knob } from "../components/Knob/Knob";
 
 export const SettingsPage = () => {
-  const navigate = useNavigate();
   const shopify = useAppBridge();
   const { shopId, shop } = useOutletContext();
 
@@ -24,6 +24,7 @@ export const SettingsPage = () => {
 
   const [verificationsEnabled, setVerificationsEnabled] = useState(shop?.verificationsEnabled);
   const [triggerPrice, setTriggerPrice] = useState(shop?.triggerPrice);
+  const [verificationFlow, setVerificationFlow] = useState(shop?.verificationFlow);
 
   // Update settings
   const [{ data, fetching, error }, send] = useFetch(`/settings/${shopId}`, { 
@@ -33,13 +34,24 @@ export const SettingsPage = () => {
     }
   });
 
+  const handleSelectChange = useCallback(
+    (value) => setVerificationFlow(value),
+    [],
+  );
+
+  const options = [
+    {label: 'Post-checkout', value: 'post-checkout'},
+    {label: 'Pre-checkout', value: 'pre-checkout'},
+  ];
+
   useEffect(() => {
     async function updateSettings() {
       await send({
         body: JSON.stringify({
           verificationsEnabled,
           triggerPrice,
-          setupComplete: true
+          verificationFlow,
+          setupComplete: !!verificationsEnabled
         })
       });
     }
@@ -82,7 +94,7 @@ export const SettingsPage = () => {
 
         <Layout.Section>
           <Card>
-            <Grid className="settings-row">
+            <Grid>
               <Grid.Cell columnSpan={{xs: 11, sm: 11, md: 11, lg: 11, xl: 11}}>
                 <Text as='h3' variant='headingMd'>
                   Big Red Button
@@ -93,18 +105,20 @@ export const SettingsPage = () => {
               </Grid.Cell>
 
               <Grid.Cell columnSpan={{xs: 1, sm: 1, md: 1, lg: 1, xl: 1}}>
-                <Knob
-                  disabled={!isTrialActivated}
-                  selected={verificationsEnabled}
-                  ariaLabel='Big Red Button'
-                  tone="critical"
-                  onClick={() => setVerificationsEnabled((prev) => !prev)}
-                />
+                <div style={{ textAlign: 'right' }}>
+                  <Knob
+                    disabled={!isTrialActivated}
+                    selected={verificationsEnabled}
+                    ariaLabel='Big Red Button'
+                    tone="critical"
+                    onClick={() => setVerificationsEnabled((prev) => !prev)}
+                  />
+                </div>
               </Grid.Cell>
             </Grid>
 
-            <Grid className="settings-row">
-              <Grid.Cell columnSpan={{xs: 10, sm: 10, md: 10, lg: 10, xl: 10}}>
+            <Grid>
+              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
                 <Text as='h3' variant='headingMd'>
                   Trigger Price
                 </Text>
@@ -115,7 +129,7 @@ export const SettingsPage = () => {
                 </Text>
               </Grid.Cell>
 
-              <Grid.Cell columnSpan={{xs: 2, sm: 2, md: 2, lg: 2, xl: 2}}>
+              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
                 <TextField
                   type="number"
                   prefix="$"
@@ -125,6 +139,28 @@ export const SettingsPage = () => {
                   autoComplete="off"
                   disabled={!isTrialActivated}
                   style={{ cursor: isTrialActivated ? 'not-allowed' : 'pointer' }}
+                />
+              </Grid.Cell>
+            </Grid>
+
+            <Grid>
+              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
+                <Text as='h3' variant='headingMd'>
+                  Verification Flow
+                </Text>
+                
+                <Text as='p' variant='bodyMd'>
+                  Choose between pre-checkout or post-checkout for your verification requests. Pre-checkout
+                  will show an embedded verification flow on the cart page, before the customer can checkout.
+                  Post-checkout will email a verification link to the customer after they place an order.
+                </Text>
+              </Grid.Cell>
+
+              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
+                <Select
+                  options={options}
+                  onChange={handleSelectChange}
+                  value={verificationFlow}
                 />
               </Grid.Cell>
             </Grid>

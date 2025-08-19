@@ -125,6 +125,7 @@ function EmbeddedApp() {
       verificationsEnabled: true,
       testVerificationSent: true,
       triggerPrice: true,
+      verificationFlow: true,
       veriflyPlan: {
         id: true,
         name: true,

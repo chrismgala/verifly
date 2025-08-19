@@ -36,6 +36,51 @@ export const run = async ({ trigger, logger, api }) => {
     );
 
     try {
+      let existingCustomer, newOrUpdatedCustomer;
+
+      // Handle pre-checkout flow where we create the customer record with just an email if they don't exist
+      existingCustomer = await api.shopifyCustomer.maybeFindFirst({
+        filter: {
+          email: {
+            equals: customerEmail
+          },
+          shopId: {
+            equals: shopId
+          }
+        }
+      });
+
+      if (!existingCustomer) {
+        // Create the customer as well so we can track verification status and follow up accordingly
+        newOrUpdatedCustomer = await api.shopifyCustomer.upsert({
+          on: ['platformCustomerId'],
+          platformCustomerId: order.customer?.id,
+          email: customerEmail,
+          firstName: customerFirstName,
+          lastName: customerLastName,
+          // Reference the shop using _link syntax
+          shop: {
+            _link: shopId // This is the ID of the shopifyShop where shopifyShop is the parent record
+          }
+        });
+
+        logger.info(
+          { newOrUpdatedCustomer },
+          "Upserted new customer record from webhook"
+        );
+      } else {
+        await api.shopifyCustomer.update(existingCustomer.id, {
+          platformCustomerId: order.customer?.id,
+          firstName: customerFirstName,
+          lastName: customerLastName,
+        });
+
+        logger.info(
+          { existingCustomer },
+          "Updated existing customer record from webhook"
+        );
+      }
+
       // Order doesn't exist, create a new record
       const newOrder = await api.shopifyOrder.create({
         id: orderId,
@@ -47,7 +92,7 @@ export const run = async ({ trigger, logger, api }) => {
         orderStatusUrl: order.order_status_url,
         // Reference the customer using _link syntax
         customer: {
-          _link: customer?.id // This is the ID of the shopifyCustomer where shopifyCustomer is the parent record
+          _link: existingCustomer ? existingCustomer.id : newOrUpdatedCustomer.id // This is the ID of the shopifyCustomer where shopifyCustomer is the parent record
         }
       });
 
@@ -56,24 +101,6 @@ export const run = async ({ trigger, logger, api }) => {
         "Created new order record from webhook"
       );
 
-      // Create the customer as well so we can track verification status and follow up accordingly
-      const newOrUpdatedCustomer = await api.shopifyCustomer.upsert({
-        on: ['platformCustomerId'],
-        platformCustomerId: order.customer?.id,
-        email: customerEmail,
-        firstName: customerFirstName,
-        lastName: customerLastName,
-        // Reference the shop using _link syntax
-        shop: {
-          _link: shopId // This is the ID of the shopifyShop where shopifyShop is the parent record
-        }
-      });
-
-      logger.info(
-        { newOrUpdatedCustomer },
-        "Upserted new customer record from webhook"
-      );
-      
       return newOrder;
     } catch (error) {
       logger.error(
@@ -152,6 +179,14 @@ export const onSuccess = async ({ trigger, logger, api }) => {
       },
       "Order creation action completed successfully"
     );
+
+    if (shop?.verificationFlow === 'pre-checkout') {
+      logger.info(
+        { orderId: order.id, customerEmail },
+        "Abort verification email - verification flow is pre-checkout"
+      );
+      return;
+    }
 
     // Only proceed if we have a customer email
     if (!customerEmail) {

@@ -1,0 +1,52 @@
+<script src="https://verifly.gadget.app/api/client/web.min.js"></script>
+
+<script src='https://cdn.veriff.me/sdk/js/1.5/veriff.min.js'></script>
+<script src='https://cdn.veriff.me/incontext/js/v1/veriff.js'></script>
+
+<script>
+  window.shopURL = "{{ shop.secure_url }}";
+  window.shopId = "{{ shop.id }}";
+</script>
+
+<div id="verifly-container">
+  <button type="button" id="verifly-verification-trigger"
+  >
+    {{ block.settings.button_text }}
+  </button>
+
+  <button type="button" id="veriff-modal-close">&times;</button>
+
+  <div id="veriff-description">
+    <p>
+      Your email is only used to remember your verification status.
+    </p>
+  </div>
+
+  <button type="button" id="verifly-status-trigger">
+    Start Verification
+  </button>
+
+  <div id="veriff-modal">
+    <div id='veriff-root'></div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Verifly Pre-Checkout",
+  "target": "body",
+  "enabled_on": {
+    "templates": ["cart"]
+  },
+  "javascript": "pre-checkout.js",
+  "stylesheet": "styles.css",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Verify ID"
+    }
+  ]
+}
+{% endschema %}

@@ -1,4 +1,5 @@
 import { differenceInMinutes } from "date-fns";
+import jwt from "jsonwebtoken";
 
 /**
  * Capitalizes the first letter of each segment in a hyphen-separated string and removes the hyphens.
@@ -45,3 +46,20 @@ export const getDaysUntilTimestamp = (date, daysOffset = 0) => {
 
   return diffInDays;
 };
+
+/**
+ * Creates a JWT token to remember users for the pre-checkout flow.
+ * 
+ * @param {string} shopId - The shop ID
+ * @param {string} email - The customer email
+ * @returns {string} The JWT token
+ */
+export const createUserToken = (shopId, email) => {
+  const payload = {
+    shopId,
+    email,
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET);
+};
+

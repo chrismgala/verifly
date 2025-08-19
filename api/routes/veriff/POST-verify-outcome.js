@@ -23,7 +23,23 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     const { data, vendorData } = payload;
     verification = data.verification;
-    verificationId = vendorData;
+
+    // The user might take awhile to complete the checkout, so we need to postpone processing
+    if (vendorData.includes('@')) {
+      await api.enqueue(
+        api.processPreCheckoutVerification,
+        {
+          veriffWebhookPayload: payload
+        },
+        {
+          startAt: new Date(Date.now() + 1000 * 60 * 15).toISOString(), // Starts in 15 minutes
+        }
+      );
+
+      return reply.code(200).send({ message: 'Pre-checkout verification decision processing scheduled' });
+    } else {
+      verificationId = vendorData;
+    }
 
     logger.info({ verificationId }, `[Veriff - Verify Outcome] Incoming verification decision`);
   } catch (error) {
@@ -70,26 +86,8 @@ const route = async ({ request, reply, api, logger, connections }) => {
     logger.error({ verificationId }, `[Veriff - Verify Outcome] Unable to update internal verification`);
     return reply.code(500).send({error: `Unable to update internal verification: ${error.message}`});
   }
-  
 
-  switch (verification.decision) {
-    case 'approved': {
-      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification approved');
-    }
-    case 'declined': {
-      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification denied');
-    }
-    case 'resubmission_request': {
-      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification needs resubmission');
-    }
-    case 'expired': {
-      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification expired');
-    }
-    case 'abandoned': {
-      logger.info({ verificationId }, '[Veriff - Verify Outcome] Verification abandoned');
-    }
-    default: {}
-  }
+  logger.info({ verificationId }, `[Veriff - Verify Outcome] Verification ${verification.decision}`);
 
   // Update the order tags if it's not a test verification
   if (!internalVerification.test) {

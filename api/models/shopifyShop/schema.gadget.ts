@@ -53,6 +53,14 @@ export const schema: GadgetModel = {
       includeTime: true,
       storageKey: "JpALA8Yd18LL",
     },
+    verificationFlow: {
+      type: "enum",
+      default: "post-checkout",
+      acceptMultipleSelections: false,
+      acceptUnlistedOptions: false,
+      options: ["pre-checkout", "post-checkout"],
+      storageKey: "1LyUyzhYhPh6",
+    },
     verifications: {
       type: "hasMany",
       children: { model: "verification", belongsToField: "shop" },

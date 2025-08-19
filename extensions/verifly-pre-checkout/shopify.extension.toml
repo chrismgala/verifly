@@ -1,0 +1,10 @@
+[[extensions]]
+name = "Verifly Pre-Checkout"
+description = "Verify customer ID's before they proceed to the checkout page"
+handle = "verifly-pre-checkout"
+type = "theme"
+
+  [extensions.capabilities]
+  api_access = true
+  block_progress = true
+  network_access = true
