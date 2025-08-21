@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams } from "react-router";
 import { useFetch } from "@gadgetinc/react";
 
 import { 
@@ -52,8 +52,6 @@ const CONFIDENCE_LEVEL_MAP = {
 
 export const VerificationPage = () => {
   const { id, sessionId } = useParams();
-
-  const navigate = useNavigate();
 
   const [localVerificationStatus, setLocalVerificationStatus] = useState(null);
   const [isOverriding, setIsOverriding] = useState(false);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useOutletContext } from "react-router";
+import { useOutletContext } from "react-router";
 import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
 import { useFetch } from "@gadgetinc/react";
 
@@ -16,7 +16,6 @@ import {
 } from "@shopify/polaris";
 
 export const ProductsPage = () => {
-  const navigate = useNavigate();
   const shopify = useAppBridge();
   const { shopId, shop } = useOutletContext();
 

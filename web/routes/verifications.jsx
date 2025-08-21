@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useOutletContext, Link } from "react-router";
+import { useOutletContext, Link } from "react-router";
 import { useFetch } from "@gadgetinc/react";
 
 import {
@@ -21,7 +21,6 @@ import { FullPageSpinner } from "../components/FullPageSpinner";
 
 export const VerificationsPage = () => {
   // Initial setup
-  const navigate = useNavigate();
   const { shopId, shop } = useOutletContext();
 
   const isTrialActivated = shop?.confirmationUrl && shop?.veriflyPlan;

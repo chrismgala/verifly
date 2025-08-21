@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext, useNavigate } from "react-router";
+import { useOutletContext } from "react-router";
 import { useFetch } from '@gadgetinc/react';
 import { Modal, TitleBar, useAppBridge } from '@shopify/app-bridge-react';
 
@@ -14,7 +14,6 @@ import {
 } from '@shopify/polaris';
 
 export const TestVerificationPage = () => {
-  const navigate = useNavigate();
   const shopify = useAppBridge();
   const { shopId, shop } = useOutletContext();
 

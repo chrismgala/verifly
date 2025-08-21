@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from "react-router";
 import { useFindMany } from "@gadgetinc/react";
 
 import {   
@@ -14,8 +13,6 @@ import { FullPageSpinner } from '../components/FullPageSpinner';
 import { api } from "../api";
 
 export const BillingPage = () => {
-  const navigate = useNavigate();
-
   const [showErrorBanner, setShowErrorBanner] = useState(false);
   const [bannerContext, setBannerContext] = useState("");
 
