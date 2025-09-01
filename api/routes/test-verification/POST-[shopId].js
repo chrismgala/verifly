@@ -5,7 +5,7 @@ import { createVerificationSession } from "../../helpers/veriff";
 import VerificationEmail from "../../../web/components/VerificationEmail/VerificationEmail";
 
 /**
- * Route handler for order verifications
+ * Route handler for test verification emails
  *
  * @type { RouteHandler } route handler - see: https://docs.gadget.dev/guides/http-routes/route-configuration#route-context
  */
@@ -63,7 +63,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     if (error) {
       logger.error({ error }, "Error sending test verification email");
-      return;
+      return reply.code(500).send({ error: "Failed to send test verification email" });
     }
 
     logger.info({ emailId: data?.id }, "Test verification email sent successfully");

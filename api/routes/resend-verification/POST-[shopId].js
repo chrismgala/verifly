@@ -5,7 +5,7 @@ import { createVerificationSession } from "../../helpers/veriff";
 import VerificationEmail from "../../../web/components/VerificationEmail/VerificationEmail";
 
 /**
- * Route handler for order verifications
+ * Route handler for resending verification emails
  *
  * @type { RouteHandler } route handler - see: https://docs.gadget.dev/guides/http-routes/route-configuration#route-context
  */
