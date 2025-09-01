@@ -29,6 +29,10 @@ input:disabled,
   cursor: not-allowed;
 }
 
+select:disabled {
+  cursor: not-allowed;
+}
+
 /* Crisp chat override */
 .crisp-client .cc-1brb6 .cc-1yy0g .cc-1m2mf .cc-157aw {
   background-color: #ed733e !important;

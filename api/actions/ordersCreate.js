@@ -268,15 +268,35 @@ export const onSuccess = async ({ trigger, logger, api }) => {
         sessionId: verification.id,
       });
 
+      let from = 'Verifly <info@verifly.shop>';
+      let domainIsVerified = false;
+
+      if (shop?.domainId) {
+        const { data: domainData, error: domainError } = await resend.domains.get(shop.domainId);
+
+        if (domainError) {
+          logger.error({ domainError }, "Error checking domain status in Resend");
+        } else {
+          domainIsVerified = domainData?.status === 'verified';
+
+          if (domainIsVerified) {
+            from = `${shopName} <info@${shop?.emailDomain}>`
+          }
+        }
+      }
+
       const { data, error } = await resend.emails.send({
-        from: 'Verifly <info@verifly.shop>',
+        from: from,
         to: customerEmail,
         subject: `[Action required] Verify your identity`,
         react: VerificationEmail({
           shopName,
           customerName,
           orderNumber,
-          url
+          url,
+          ...(shop.logo && domainIsVerified ? { logo: shop.logo } : null),
+          ...(shop.primaryColor && domainIsVerified ? { primaryColor: shop.primaryColor } : null),
+          ...(shop.secondaryColor && domainIsVerified ? { secondaryColor: shop.secondaryColor } : null)
         })
       });
 

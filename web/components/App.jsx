@@ -126,6 +126,14 @@ function EmbeddedApp() {
       testVerificationSent: true,
       triggerPrice: true,
       verificationFlow: true,
+      logo: { 
+        url: true
+      },
+      primaryColor: true,
+      secondaryColor: true,
+      emailDomain: true,
+      domainRecords: true,
+      domainId: true,
       veriflyPlan: {
         id: true,
         name: true,

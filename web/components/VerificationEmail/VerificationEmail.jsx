@@ -10,7 +10,6 @@ import {
   Text,
   Button,
   Hr,
-  Link,
   Tailwind,
 } from '@react-email/components';
 
@@ -19,6 +18,9 @@ const VerificationEmail = ({
   customerName, 
   orderNumber, 
   url,
+  logo = null,
+  primaryColor = null,
+  secondaryColor = null,
   test = false
 }) => {
 
@@ -27,12 +29,12 @@ const VerificationEmail = ({
       <Tailwind>
         <Head />
         <Body className="bg-[#0a0c10] font-sans py-[40px]">
-          <Container className="bg-[#181a20] max-w-[600px] mx-auto rounded-[12px] overflow-hidden">
+          <Container className={`bg-[${primaryColor ? primaryColor : '#181a20'}] max-w-[600px] mx-auto rounded-[12px] overflow-hidden`}>
             {/* Header with Logo */}
-            <Section className="bg-[#181a20] px-[32px] pt-[32px] pb-[24px] text-center">
+            <Section className={`bg-[${primaryColor ? primaryColor : '#181a20'}] px-[32px] pt-[32px] pb-[24px] text-center`}>
               <Img
-                src="https://verifly.shop/logo-transparent.png"
-                alt="Verifly"
+                src={logo ? logo.url : 'https://verifly.shop/logo-transparent.png'}
+                alt={logo ? shopName : 'Verifly'}
                 className="w-[120px] h-auto mx-auto"
               />
             </Section>
@@ -59,14 +61,14 @@ const VerificationEmail = ({
               <Section className="text-center mb-[32px]">
                 <Button
                   href={url}
-                  className="bg-[#ed733e] text-white px-[32px] py-[16px] rounded-[8px] text-[16px] font-semibold no-underline box-border inline-block"
+                  className={`bg-[${secondaryColor ? secondaryColor : '#ed733e'}] text-white px-[32px] py-[16px] rounded-[8px] text-[16px] font-semibold no-underline box-border inline-block`}
                 >
                   Verify Your Identity
                 </Button>
               </Section>
 
               <Text className="text-[#fff] text-[14px] leading-[20px] mb-[24px] text-center">
-                This verification typically takes 2-3 minutes to complete.
+                This verification typically takes 1 minute to complete.
               </Text>
 
               <Hr className="border-[#333] my-[24px]" />
@@ -93,20 +95,8 @@ const VerificationEmail = ({
             {/* Footer */}
             <Hr className="border-[#333] mx-[32px]" />
             <Section className="px-[32px] py-[24px] text-center">
-              <Text className="text-[#999] text-[12px] leading-[16px] mb-[8px] m-0">
-                22 Martino, Mission Viejo, CA 92694
-              </Text>
-              <Text className="text-[#999] text-[12px] leading-[16px] mb-[16px]">
-                <Link href="https://verifly.shop/" className="text-[#ed733e] no-underline">
-                  Unsubscribe
-                </Link>
-                {' | '}
-                <Link href="https://verifly.shop/privacy-policy.html" className="text-[#ed733e] no-underline">
-                  Privacy Policy
-                </Link>
-              </Text>
               <Text className="text-[#999] text-[12px] leading-[16px] m-0">
-                © {new Date().getFullYear()} Verifly. All rights reserved.
+                © {new Date().getFullYear()} {shopName}. All rights reserved.
               </Text>
             </Section>
           </Container>

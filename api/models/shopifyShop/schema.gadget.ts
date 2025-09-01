@@ -16,13 +16,24 @@ export const schema: GadgetModel = {
       storageKey: "Lndxs9BTEbkA",
     },
     confirmationUrl: { type: "url", storageKey: "OzdyMMuyE-v6" },
+    domainId: { type: "string", storageKey: "68LwaLQp0wnd" },
+    domainRecords: { type: "json", storageKey: "ZnZ1ucaP1bND" },
+    emailDomain: { type: "string", storageKey: "iQsQ9S56rXB3" },
     ip: { type: "string", storageKey: "bZ9Mw9SQl0K_" },
+    logo: {
+      type: "file",
+      allowPublicAccess: true,
+      validations: { imagesOnly: true },
+      storageKey: "dvaLoiWvNUd4",
+    },
     monthlyVerificationCount: {
       type: "computed",
       sourceFile:
         "api/models/shopifyShop/monthlyVerificationCount.gelly",
       storageKey: "NnyUm2yxxy5b",
     },
+    primaryColor: { type: "string", storageKey: "q9YeG4llwzHw" },
+    secondaryColor: { type: "string", storageKey: "JNAuni7ucFIc" },
     setupComplete: {
       type: "boolean",
       default: false,
