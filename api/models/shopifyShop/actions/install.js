@@ -119,7 +119,7 @@ export const onSuccess = async ({
             plan: {
               appRecurringPricingDetails: {
                 price: {
-                  amount: 39.00,
+                  amount: 49.00,
                   currencyCode: "USD",
                 },
                 interval: "EVERY_30_DAYS",

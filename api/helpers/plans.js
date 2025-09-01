@@ -1,12 +1,12 @@
 export const plans = {
   'watchtower': {
     id: 1,
-    price: 39,
+    price: 49,
     usagePrice: 0.99,
   },
   'fort-knox': {
     id: 2,
-    price: 79,
+    price: 99,
     usagePrice: 1.49,
   },
   'nuclear-bunker': {
