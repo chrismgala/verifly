@@ -36,6 +36,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     await reply.code(200).send({
       domain: data?.name,
+      domainId: data?.id,
       domainRecords: records,
       status: data?.status,
     });

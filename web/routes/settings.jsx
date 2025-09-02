@@ -37,7 +37,9 @@ export const SettingsPage = () => {
   const [secondaryColor, setSecondaryColor] = useState(shop?.secondaryColor || '#2196F3');
   const [emailDomain, setEmailDomain] = useState(shop?.emailDomain || '');
   const [emailDomainError, setEmailDomainError] = useState('');
+  const [domainRecords, setDomainRecords] = useState(shop?.domainRecords || null);
   const [domainStatus, setDomainStatus] = useState(shop?.domainStatus || '');
+  const [domainId, setDomainId] = useState(shop?.domainId || null);
   const [domainRecordsRows, setDomainRecordsRows] = useState([]);
 
   const isEmailDomainValid = emailDomain.length > 0 && emailDomain.match(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/);
@@ -72,7 +74,8 @@ export const SettingsPage = () => {
     method: "POST",
     headers: {
       "content-type": "application/json",
-    }
+    },
+    json: true
   });
 
   // Verify domain in Resend
@@ -105,8 +108,14 @@ export const SettingsPage = () => {
 
   useEffect(() => {
     if (domainData) {
-      const domainRecords = domainData?.domainRecords;
+      setDomainRecords(domainData?.domainRecords);
+      setDomainStatus(domainData?.status);
+      setDomainId(domainData?.domainId);
+    }
+  }, [domainData]);
 
+  useEffect(() => {
+    if (domainRecords) {
       const rows = Object.keys(domainRecords).map((key) => {
         return [
           domainRecords[key].record,
@@ -119,10 +128,9 @@ export const SettingsPage = () => {
         ];
       });
 
-      setDomainStatus(domainData?.status);
       setDomainRecordsRows(rows);
     }
-  }, [domainData]);
+  }, [domainRecords]);
 
   useEffect(() => {
     if (statusData) {
@@ -367,45 +375,47 @@ export const SettingsPage = () => {
               </Grid.Cell>
 
               <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
-                {domainStatus !== 'verified' && shop?.domainId ? (
-                  <Button
-                    onClick={() => {
-                      shopify.modal.show('domain-records');
-                    }}
-                  >
-                    Verify Domain
-                  </Button>
-                ) : (
-                  <TextField
-                    type="text"
-                    value={emailDomain}
-                    onChange={setEmailDomain}
-                    onBlur={() => {
-                      if (!isEmailDomainValid) {
-                        setEmailDomainError('Domain is not valid');
-                      } else {
-                        setEmailDomainError('');
-                      }
-                    }}
-                    placeholder="example.com"
-                    error={emailDomainError}
-                    autoComplete="off"
-                    disabled={!isTrialActivated}
-                  />
-                )}
+                <div style={{ textAlign: 'right' }}>
+                  {domainStatus !== 'verified' && domainId ? (
+                    <Button
+                      onClick={() => {
+                        shopify.modal.show('domain-records');
+                      }}
+                    >
+                      Verify Domain
+                    </Button>
+                  ) : (
+                    <TextField
+                      type="text"
+                      value={emailDomain}
+                      onChange={setEmailDomain}
+                      onBlur={() => {
+                        if (!isEmailDomainValid) {
+                          setEmailDomainError('Domain is not valid');
+                        } else {
+                          setEmailDomainError('');
+                        }
+                      }}
+                      placeholder="example.com"
+                      error={emailDomainError}
+                      autoComplete="off"
+                      disabled={!isTrialActivated}
+                    />
+                  )}
+                </div>
               </Grid.Cell>
             </Grid>
           </Card>
         </Layout.Section>
       </Layout>
 
-      <Modal id="domain-records">
+      <Modal id="domain-records" variant="large">
         <TitleBar title="Domain Records">
           <button variant="primary" onClick={handleVerifyDomain}>Verify</button>
           <button onClick={() => shopify.modal.hide('domain-records')}>Close</button>
         </TitleBar>
 
-        <Box paddingBlock="400">
+        <Box padding="400">
           <Text as='p' variant='bodyMd'>
             The following records need to be added to your domain's DNS settings to verify your domain. 
             Once you've added them, click "Verify" to initiate the verification process.
