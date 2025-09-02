@@ -101,7 +101,7 @@ export const params = {
       veriflyPlan: {
         type: "object",
         properties: {
-          id: { type: "number" },
+          id: { type: "string" },
           usagePrice: { type: "number" },
         },
       },
