@@ -254,9 +254,9 @@ export const SettingsPage = () => {
                 </Text>
                 
                 <Text as='p' variant='bodyMd'>
-                  Choose between pre-checkout or post-checkout for your verification requests. Pre-checkout
-                  will show an embedded verification flow on the cart page, before the customer can checkout.
-                  Post-checkout will email a verification link to the customer after they place an order.
+                  Pre-checkout will show an embedded verification flow on the cart page, before the customer can checkout.
+                  Post-checkout will email a verification link to the customer after they place an order. 
+                  If you're using pre-checkout, you must <a href={`https://${shop.myshopifyDomain}/admin/themes/current/editor?template=cart&addAppBlockId=${process.env.SHOPIFY_VERIFLY_PRE_CHECKOUT_ID}`} target="_blank">install</a> the theme extension as an App Embed.
                 </Text>
               </Grid.Cell>
 

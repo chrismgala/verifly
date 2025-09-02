@@ -138,7 +138,8 @@ function EmbeddedApp() {
         id: true,
         name: true,
         price: true,
-      }
+      },
+      myshopifyDomain: true,
     }
   });
 
