@@ -3,14 +3,14 @@ import { RouteHandler } from "gadget-server";
 import { isSignatureValid } from '../../helpers/veriff';
 
 /**
- * Route handler for stripe webhook
+ * Route handler for Veriff webhook
  *
  * @type { RouteHandler } route handler - see: https://docs.gadget.dev/guides/http-routes/route-configuration#route-context
  */
 const route = async ({ request, reply, api, logger, connections }) => {
   let verificationId, verification;
 
-  // Verify the event came from Stripe
+  // Verify the event came from Veriff
   try {
     const signature = request.headers['x-hmac-signature'];
     const secret = process.env.VERIFF_SECRET_KEY;
