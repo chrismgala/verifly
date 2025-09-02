@@ -37,7 +37,7 @@ export const run = async ({ params, trigger, logger, api, connections }) => {
 
   const { monthlyVerificationCount, veriflyPlan } = shop;
   
-  const totalUsageCost = parseFloat(monthlyVerificationCount * veriflyPlan.usagePrice);
+  const totalUsageCost = parseFloat(monthlyVerificationCount * veriflyPlan.usagePrice).toFixed(2);
   const currentMonth = new Date().getMonth();
 
   if (totalUsageCost > 0) {
@@ -54,7 +54,7 @@ export const run = async ({ params, trigger, logger, api, connections }) => {
         }
       }`,
       {
-        description: `Charge of $${totalUsageCost} for verifications in the ${MONTHS[currentMonth > 0 ? currentMonth - 1 : 11]}`,
+        description: `Charge of $${totalUsageCost} for verifications in ${MONTHS[currentMonth > 0 ? currentMonth - 1 : 11]}`,
         price: {
           amount: totalUsageCost,
           currencyCode: "USD",
