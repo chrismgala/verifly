@@ -33,27 +33,20 @@
   });
 
   /**
-   * Checks if the cart has any variants needing verification.
-   * 
-   * @param {Object} cart - The cart object.
-   * @param {number[]} variantIds - The variant IDs to check.
-   * @returns {boolean} - Whether the cart has any variants needing verification.
-   */
-  function cartHasVariantsNeedingVerification(cart, variantIds) {
-    return cart.items.some(item => variantIds.includes(item.variant_id));
-  }
-
-  /**
    * Fetches the variants needing verification for the shop.
    * 
+   * @param {number[]} variantsInCart - The variant IDs in the cart.
    * @returns {Promise<Object>} - The variants needing verification.
    */
-  async function fetchVariantsNeedingVerification() {
+  async function fetchVariantsNeedingVerification(variantsInCart) {
     const response = await fetch(`${window.shopURL}/apps/proxy/variants/${window.shopId}`, {
-      method: "GET",
+      method: "POST",
       headers: {
         "content-type": "application/json",
-      }
+      },
+      body: JSON.stringify({
+        variantsInCart
+      })
     });
     return await response.json();
   }
@@ -123,17 +116,19 @@
     checkoutButton.disabled = true;
 
     const cart = await fetchCart();
-    const { variantIds } = await fetchVariantsNeedingVerification();
-    const userNeedsToVerify = cartHasVariantsNeedingVerification(cart, variantIds);
+    const variantsInCart = cart.items.map(item => item.variant_id.toString());
+
+    const { variantIds } = await fetchVariantsNeedingVerification(variantsInCart);
+    const orderRequiresVerification = variantIds.length > 0;
 
     const userToken = localStorage.getItem('verifly_t');
-    let alreadyVerified = false;
+    let userAlreadyVerified = false;
     if (userToken) {
       const { status } = await checkIfAlreadyVerified(userToken);
-      alreadyVerified = status === 'approved';
+      userAlreadyVerified = status === 'approved';
     }
 
-    if (!alreadyVerified && userNeedsToVerify) {
+    if (!userAlreadyVerified && orderRequiresVerification) {
       const body = document.body;
       const cartCTAs = document.querySelector("div.cart__ctas");
 
