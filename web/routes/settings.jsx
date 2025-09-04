@@ -118,7 +118,6 @@ export const SettingsPage = () => {
     if (domainRecords) {
       const rows = Object.keys(domainRecords).map((key) => {
         return [
-          domainRecords[key].record,
           domainRecords[key].type,
           domainRecords[key].name,
           domainRecords[key].value,
@@ -427,12 +426,10 @@ export const SettingsPage = () => {
               'text',
               'text',
               'text',
-              'text',
               'numeric',
               'text'
             ]}
             headings={[
-              'Record',
               'Type',
               'Name',
               'Value',
