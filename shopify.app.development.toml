@@ -17,5 +17,10 @@ redirect_urls = [
 [pos]
 embedded = false
 
+[app_proxy]
+url = "https://verifly--development.gadget.app/proxy/"
+subpath = "proxy"
+prefix = "apps"
+
 [build]
 include_config_on_deploy = false

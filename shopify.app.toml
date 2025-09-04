@@ -19,3 +19,8 @@ redirect_urls = [
 
 [pos]
 embedded = false
+
+[app_proxy]
+url = "https://verifly.gadget.app/proxy/"
+subpath = "proxy"
+prefix = "apps"
