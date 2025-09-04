@@ -23,6 +23,29 @@ import {
 import { Knob } from "../components/Knob/Knob";
 import { api } from "../api";
 
+const VERIFICATION_STATUS = {
+  verified: {
+    badge: <Badge tone="success">Verified</Badge>,
+    text: 'Verified'
+  },
+  failed: {
+    badge: <Badge tone="critical">Failed</Badge>,
+    text: 'Failed'
+  },
+  pending: {
+    badge: <Badge tone="attention">Pending</Badge>,
+    text: 'Pending'
+  },
+  not_started: {
+    badge: <Badge tone="info">Not started</Badge>,
+    text: 'Not started'
+  },
+  temporary_failure: {
+    badge: <Badge tone="warning">Temporary failure</Badge>,
+    text: 'Temporary failure'
+  }
+};
+
 export const SettingsPage = () => {
   const shopify = useAppBridge();
   const { shopId, shop } = useOutletContext();
@@ -123,7 +146,7 @@ export const SettingsPage = () => {
           domainRecords[key].value,
           domainRecords[key].ttl,
           domainRecords[key].priority,
-          domainRecords[key].status,
+          VERIFICATION_STATUS[domainRecords[key].status]?.text,
         ];
       });
 
@@ -365,7 +388,7 @@ export const SettingsPage = () => {
             <Grid>
               <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
                 <Text as='h3' variant='headingMd'>
-                  Email Domain {displayVerificationBadge(domainStatus)}
+                  Email Domain {VERIFICATION_STATUS[domainStatus]?.badge}
                 </Text>
                 
                 <Text as='p' variant='bodyMd'>
@@ -443,21 +466,4 @@ export const SettingsPage = () => {
       </Modal>
     </Page>
   );
-}
-
-export function displayVerificationBadge(status) {
-  switch (status) {
-    case 'verified':
-      return <Badge tone="success">Verified</Badge>;
-    case 'failed':
-      return <Badge tone="critical">Failed</Badge>;
-    case 'pending':
-      return <Badge tone="attention">Pending</Badge>;
-    case 'not_started':
-      return <Badge tone="info">Not started</Badge>;
-    case 'temporary_failure':
-      return <Badge tone="warning">Temporary failure</Badge>;
-    default:
-      return null;
-  }
 }
