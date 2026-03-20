@@ -2,6 +2,7 @@
 name = "Verifly Pre-Checkout"
 description = "Verify customer ID's before they proceed to the checkout page"
 handle = "verifly-pre-checkout"
+uid = "8f2a44c7-2ca7-a049-7c77-3b4663fa77a9a246db10"
 type = "theme"
 
   [extensions.capabilities]
