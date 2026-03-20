@@ -8,8 +8,7 @@ import { Resend } from "resend";
  */
 const route = async ({ request, reply, api, logger, connections }) => {
   try {
-    const shopId = request.params.shopId;
-    const { domain } = request.body;
+    const { domain, shopId } = request.body;
 
     logger.info({ shopId, domain }, 'Creating custom domain in Resend');
 
@@ -24,20 +23,14 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     logger.info({ domain: data?.name }, "Custom domain created successfully");
 
-    let records = {};
-    for (let i = 0; i < data?.records.length; i++) {
-      records[i] = data?.records[i];
-    }
-
     await api.shopifyShop.update(shopId, {
-      domainRecords: records,
       domainId: data?.id,
     });
 
     await reply.code(200).send({
       domain: data?.name,
       domainId: data?.id,
-      domainRecords: records,
+      domainRecords: data?.records,
       status: data?.status,
     });
 
@@ -54,19 +47,13 @@ const route = async ({ request, reply, api, logger, connections }) => {
 // Set route options including body schema validation
 route.options = {
   schema: {
-    params: {
-      type: "object",
-      properties: {
-        shopId: { type: "string" },
-      },
-      required: ["shopId"],
-    },
     body: {
       type: "object",
       properties: {
         domain: { type: "string" },
+        shopId: { type: "string" },
       },
-      required: ["domain"],
+      required: ["domain", "shopId"],
     },
   },
 };

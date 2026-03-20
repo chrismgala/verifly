@@ -60,8 +60,8 @@ export const SettingsPage = () => {
   const [secondaryColor, setSecondaryColor] = useState(shop?.secondaryColor || '#2196F3');
   const [emailDomain, setEmailDomain] = useState(shop?.emailDomain || '');
   const [emailDomainError, setEmailDomainError] = useState('');
-  const [domainRecords, setDomainRecords] = useState(shop?.domainRecords || null);
-  const [domainStatus, setDomainStatus] = useState(shop?.domainStatus || '');
+  const [domainRecords, setDomainRecords] = useState(null);
+  const [domainStatus, setDomainStatus] = useState('');
   const [domainId, setDomainId] = useState(shop?.domainId || null);
   const [domainRecordsRows, setDomainRecordsRows] = useState([]);
 
@@ -93,7 +93,7 @@ export const SettingsPage = () => {
   });
 
   // Create custom domain in Resend
-  const [{ data: domainData, fetching: domainFetching, error: domainError }, createDomain] = useFetch(`/domain/${shopId}`, {
+  const [{ data: domainData, fetching: domainFetching, error: domainError }, createDomain] = useFetch(`/domain/create`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -139,14 +139,14 @@ export const SettingsPage = () => {
 
   useEffect(() => {
     if (domainRecords) {
-      const rows = Object.keys(domainRecords).map((key) => {
+      const rows = domainRecords.map(record => {
         return [
-          domainRecords[key].type,
-          domainRecords[key].name,
-          domainRecords[key].value,
-          domainRecords[key].ttl,
-          domainRecords[key].priority,
-          VERIFICATION_STATUS[domainRecords[key].status]?.text,
+          record.type,
+          <TableRow text={record.name} />,
+          <TableRow text={record.value} />,
+          record.ttl,
+          record.priority,
+          VERIFICATION_STATUS[record.status]?.badge,
         ];
       });
 
@@ -157,6 +157,7 @@ export const SettingsPage = () => {
   useEffect(() => {
     if (statusData) {
       setDomainStatus(statusData?.status);
+      setDomainRecords(statusData?.records);
     }
   }, [statusData]);
 
@@ -176,7 +177,8 @@ export const SettingsPage = () => {
     if (emailDomain) {
       await createDomain({
         body: JSON.stringify({
-          domain: emailDomain
+          domain: emailDomain,
+          shopId: shopId
         })
       });
     }
@@ -190,6 +192,16 @@ export const SettingsPage = () => {
         domainId: shop?.domainId
       })
     });
+
+    const response = await api.fetch(`/domain/${shop?.domainId}`, {
+      method: "GET",
+      json: true
+    });
+
+    const data = await response.json();
+
+    setDomainStatus(data?.status);
+    setDomainRecords(data?.records);
   };
 
   const handleDiscard = () => {
@@ -398,71 +410,89 @@ export const SettingsPage = () => {
 
               <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
                 <div style={{ textAlign: 'right' }}>
-                  {domainStatus !== 'verified' && domainId ? (
-                    <Button
-                      onClick={() => {
-                        shopify.modal.show('domain-records');
-                      }}
-                    >
-                      Verify Domain
-                    </Button>
-                  ) : (
-                    <TextField
-                      type="text"
-                      value={emailDomain}
-                      onChange={setEmailDomain}
-                      onBlur={() => {
-                        if (!isEmailDomainValid) {
-                          setEmailDomainError('Domain is not valid');
-                        } else {
-                          setEmailDomainError('');
-                        }
-                      }}
-                      placeholder="example.com"
-                      error={emailDomainError}
-                      autoComplete="off"
-                      disabled={!isTrialActivated}
-                    />
-                  )}
+                  <TextField
+                    type="text"
+                    value={emailDomain}
+                    onChange={setEmailDomain}
+                    onBlur={() => {
+                      if (!isEmailDomainValid) {
+                        setEmailDomainError('Domain is not valid');
+                      } else {
+                        setEmailDomainError('');
+                      }
+                    }}
+                    placeholder="example.com"
+                    error={emailDomainError}
+                    autoComplete="off"
+                    disabled={!isTrialActivated || domainStatus === 'verified' || domainId}
+                  />
                 </div>
               </Grid.Cell>
             </Grid>
+
+            {domainId && (
+              <Grid>
+                <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
+                  <Text as='h3' variant='headingMd'>
+                    DNS Records
+                  </Text>
+                  
+                  <Text as='p' variant='bodyMd'>
+                    The following records need to be added to your domain's DNS settings to verify your domain. 
+                    Once you've added them, click "Verify" to initiate the verification process. 
+                    Verification may take up to a few hours to complete.
+                  </Text>
+                </Grid.Cell>
+
+                <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
+                  <div style={{ textAlign: 'right' }}>
+                    <Button 
+                      onClick={handleVerifyDomain} 
+                      disabled={domainStatus === 'verified' || domainStatus === 'pending'}
+                      loading={verifyFetching}
+                    >
+                      Verify Domain
+                    </Button>
+                  </div>
+                </Grid.Cell>
+
+                <Grid.Cell columnSpan={{xs: 12, sm: 12, md: 12, lg: 12, xl: 12}}>
+                  <DataTable
+                    columnContentTypes={[
+                      'text',
+                      'text',
+                      'text',
+                      'text',
+                      'numeric',
+                      'text'
+                    ]}
+                    headings={[
+                      'Type',
+                      'Name',
+                      'Value',
+                      'TTL',
+                      'Priority',
+                      'Status',
+                    ]}
+                    rows={domainRecordsRows}
+                  />
+                </Grid.Cell>
+              </Grid>
+            )}
           </Card>
         </Layout.Section>
       </Layout>
 
-      <Modal id="domain-records" variant="large">
-        <TitleBar title="Domain Records">
-          <button variant="primary" onClick={handleVerifyDomain}>Verify</button>
-          <button onClick={() => shopify.modal.hide('domain-records')}>Close</button>
-        </TitleBar>
+      <Modal id="preview-email-modal" variant="max">
+        <TitleBar title="Preview Email" />
 
-        <Box padding="400">
-          <Text as='p' variant='bodyMd'>
-            The following records need to be added to your domain's DNS settings to verify your domain. 
-            Once you've added them, click "Verify" to initiate the verification process.
-          </Text>
-
-          <DataTable
-            columnContentTypes={[
-              'text',
-              'text',
-              'text',
-              'text',
-              'numeric',
-              'text'
-            ]}
-            headings={[
-              'Type',
-              'Name',
-              'Value',
-              'TTL',
-              'Priority',
-              'Status',
-            ]}
-            rows={domainRecordsRows}
-          />
-        </Box>
+        <iframe
+          title="Email Preview"
+          width="100%"
+          height="1100px"
+          aria-label="Email Preview"
+          srcDoc={emailPreviewHtml}
+        />
       </Modal>
     </Page>
   );

@@ -23,6 +23,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     await reply.code(200).send({
       status: data?.status,
+      records: data?.records,
     });
 
   } catch (error) {

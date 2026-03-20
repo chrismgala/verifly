@@ -8,7 +8,7 @@ import { Resend } from "resend";
  */
 const route = async ({ request, reply, api, logger, connections }) => {
   try {
-    const domainId = request.params.domainId;
+    const { domainId } = request.body;
 
     logger.info({ domainId }, 'Verifying domain in Resend');
 

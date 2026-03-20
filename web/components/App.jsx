@@ -132,7 +132,6 @@ function EmbeddedApp() {
       primaryColor: true,
       secondaryColor: true,
       emailDomain: true,
-      domainRecords: true,
       domainId: true,
       veriflyPlan: {
         id: true,
