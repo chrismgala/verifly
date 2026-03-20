@@ -1,7 +1,8 @@
 **/.DS_Store
-node_modules/
 .env
+
 .shopify
 .cursor/
+.idea/
 .gadget/
-.react-router/
+node_modules/
