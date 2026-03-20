@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useOutletContext } from "react-router";
 import { useAppBridge, SaveBar, Modal, TitleBar } from "@shopify/app-bridge-react";
 import { useAction, useFetch } from "@gadgetinc/react";
@@ -19,7 +20,9 @@ import {
   DataTable,
   Badge
 } from "@shopify/polaris";
+import { ClipboardIcon } from '@shopify/polaris-icons';
 
+import VerificationEmail from "../components/VerificationEmail/VerificationEmail";
 import { Knob } from "../components/Knob/Knob";
 import { api } from "../api";
 
@@ -64,6 +67,7 @@ export const SettingsPage = () => {
   const [domainStatus, setDomainStatus] = useState('');
   const [domainId, setDomainId] = useState(shop?.domainId || null);
   const [domainRecordsRows, setDomainRecordsRows] = useState([]);
+  const [emailPreviewHtml, setEmailPreviewHtml] = useState('');
 
   const isEmailDomainValid = emailDomain.length > 0 && emailDomain.match(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/);
 
@@ -206,6 +210,28 @@ export const SettingsPage = () => {
 
   const handleDiscard = () => {
     shopify.saveBar.hide('my-save-bar');
+  };
+
+  const handlePreviewEmail = () => {
+    // Prepare props for the preview
+    const previewProps = {
+      shopName: shop?.name,
+      customerName: shop?.shopOwner,
+      orderNumber: '#1234',
+      url: '',
+      logo: logo || null,
+      primaryColor,
+      secondaryColor,
+      customEmailDomain: domainStatus === 'verified'
+    };
+
+    const emailHtml = renderToStaticMarkup(
+      createElement(VerificationEmail, previewProps)
+    );
+
+    setEmailPreviewHtml(emailHtml);
+
+    shopify.modal.show('preview-email-modal');
   };
 
   return (
@@ -369,7 +395,7 @@ export const SettingsPage = () => {
                   Primary Color
                 </Text>
                 <Text as='p' variant='bodyMd'>
-                  This will be used for the background color of the verification email. Enter a hex color code (e.g. #FF6B35).
+                  The background color of the verification email. Enter a hex color code (e.g. #FF6B35).
                 </Text>
               </Grid.Cell>
 
@@ -386,7 +412,7 @@ export const SettingsPage = () => {
                   Secondary Color
                 </Text>
                 <Text as='p' variant='bodyMd'>
-                  This will be used for any buttons in the verification email. Enter a hex color code (e.g. #2196F3).
+                  The color of any buttons in the verification email. Enter a hex color code (e.g. #2196F3).
                 </Text>
               </Grid.Cell>
 
@@ -400,7 +426,36 @@ export const SettingsPage = () => {
             <Grid>
               <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
                 <Text as='h3' variant='headingMd'>
-                  Email Domain {VERIFICATION_STATUS[domainStatus]?.badge}
+                  Preview Email
+                </Text>
+                <Text as='p' variant='bodyMd'>
+                  Preview the verification email with your current branding and colors.
+                </Text>
+              </Grid.Cell>
+
+              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
+                <div style={{ textAlign: 'right' }}>
+                  <Button onClick={handlePreviewEmail} disabled={!isTrialActivated}>
+                    Preview Email
+                  </Button>
+                </div>
+              </Grid.Cell>
+            </Grid>
+          </Card>
+        </Layout.Section>
+
+        <Layout.Section>
+          <Card>
+            <Box paddingBlock="400">
+              <Text as='h2' variant='headingLg'>
+                Domain
+              </Text>
+            </Box>
+
+            <Grid>
+              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
+                <Text as='h3' variant='headingMd'>
+                  Email Domain
                 </Text>
                 
                 <Text as='p' variant='bodyMd'>
@@ -495,5 +550,54 @@ export const SettingsPage = () => {
         />
       </Modal>
     </Page>
+  );
+}
+
+function TableRow({ id, text }) {
+  return (
+    <div className="table-row-with-copy">
+      <span className="table-row-text" id={id}>{text}</span>
+
+      <CopyToClipboardButton text={text} id={id} />
+    </div>
+  );
+}
+
+function CopyToClipboardButton({ text, id }) {
+  const handleCopyToClipboard = (text, id) => {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+
+    textArea.focus();
+    textArea.select();
+    document.execCommand("copy");
+
+    try {
+      const successful = document.execCommand('copy');
+      const message = successful ? 'successful' : 'unsuccessful';
+      
+      console.log('Fallback: Copying text command was ' + message);
+      shopify.toast.show('Copied to clipboard', { duration: 4000 });
+    } catch (error) {
+      console.error('Fallback: Oops, unable to copy', error);
+      shopify.toast.show('Unable to copy to clipboard', { duration: 4000, isError: true });
+    }
+  
+    document.body.removeChild(textArea);
+  };
+
+  return (
+    <div className="copy-to-clipboard-button">
+      <Button 
+        variant="plain" 
+        icon={ClipboardIcon} 
+        onClick={() => handleCopyToClipboard(text, id)}
+      />
+    </div>
   );
 }

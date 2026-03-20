@@ -21,6 +21,7 @@ const VerificationEmail = ({
   logo = null,
   primaryColor = null,
   secondaryColor = null,
+  customEmailDomain = false,
   test = false
 }) => {
 
@@ -50,7 +51,7 @@ const VerificationEmail = ({
               </Text>
 
               <Text className="text-[#fff] text-[16px] leading-[24px] mb-[24px]">
-                Thank you for your recent order {orderNumber}. To ensure the security of your purchase, {shopName} has partnered with Verifly & Veriff to verify your identity before they can process and ship your order.
+                Thank you for your recent order {orderNumber}. To ensure the security of your purchase, {shopName} has partnered with {customEmailDomain ? 'Veriff' : 'Verifly & Veriff'} to verify your identity before they can process and ship your order.
               </Text>
 
               <Text className="text-[#fff] text-[16px] leading-[24px] mb-[32px]">

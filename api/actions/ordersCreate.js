@@ -296,7 +296,8 @@ export const onSuccess = async ({ trigger, logger, api }) => {
           url,
           ...(shop.logo && domainIsVerified ? { logo: shop.logo } : null),
           ...(shop.primaryColor && domainIsVerified ? { primaryColor: shop.primaryColor } : null),
-          ...(shop.secondaryColor && domainIsVerified ? { secondaryColor: shop.secondaryColor } : null)
+          ...(shop.secondaryColor && domainIsVerified ? { secondaryColor: shop.secondaryColor } : null),
+          customEmailDomain: domainIsVerified
         })
       });
 
