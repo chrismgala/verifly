@@ -10,12 +10,12 @@ const route = async ({ request, reply, api, logger, connections }) => {
   const { shopId } = request.params;
   const { userToken } = request.body;
 
-  logger.info({ shopId }, "Decoding verified user token");
+  logger.info({ shopId }, "[POST-status] - Decoding verified user token");
 
   const decoded = jwt.verify(userToken, process.env.JWT_SECRET);
 
   if (decoded.shopId !== shopId) {
-    logger.error({ shopId, decoded }, "[Proxy] Invalid shop ID");
+    logger.error({ shopId, decoded }, "[POST-status] - Invalid shop ID");
     return reply.code(400).send({ error: "Invalid shop ID" });
   }
 
@@ -32,14 +32,14 @@ const route = async ({ request, reply, api, logger, connections }) => {
     });
 
     if (customer.status === 'approved') {
-      logger.info({ shopId, email: customer.email }, "[Proxy] Confirmed user is verified");
+      logger.info({ shopId, email: customer.email }, "[POST-status] - Confirmed user is verified");
       return reply.code(200).send({ status: customer.status });
     } else {
-      logger.info({ shopId, email: customer.email }, "[Proxy] User is not verified");
+      logger.info({ shopId, email: customer.email }, "[POST-status] - User is not verified");
       return reply.code(200).send({ status: 'unverified' });
     }
   } catch (error) {
-    logger.error({ shopId, error }, "[Proxy] Could not find user from decoded metadata");
+    logger.error({ shopId, error }, "[POST-status] - Could not find user from decoded metadata");
     return reply.code(500).send(error);
   }
 };

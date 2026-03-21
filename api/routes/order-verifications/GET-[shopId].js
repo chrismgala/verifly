@@ -33,7 +33,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       // Set order data
       transformedVerification.orderName = order.name
     } catch (error) {
-      logger.error({ error, orderId: verification.orderId }, `Failed to fetch order for shop ${request.params.id}`);
+      logger.error({ error, orderId: verification.orderId }, `[GET-[shopId]] - Failed to fetch order for shop ${request.params.id}`);
       transformedVerification.order = {
         name: "Order not found"
       };
@@ -57,7 +57,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
         status: customer.status
       };
     } catch (error) {
-      logger.error({ error, customerId: verification.customerId }, `Failed to fetch customer for shop ${request.params.id}`);
+      logger.error({ error, customerId: verification.customerId }, `[GET-[shopId]] - Failed to fetch customer for shop ${request.params.id}`);
       transformedVerification.customer = {
         email: "Unknown",
         firstName: "Unknown",

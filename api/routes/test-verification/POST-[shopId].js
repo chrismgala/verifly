@@ -14,7 +14,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const shopId = request.params.shopId;
     const { testEmail } = request.body;
 
-    logger.info({ shopId }, 'Processing test verification');
+    logger.info({ shopId }, '[POST-[shopId]] - Processing test verification');
 
     // Find the shop by ID
     const shop = await api.shopifyShop.findOne(shopId, {
@@ -44,7 +44,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const { verification } = veriffVerification;
     const { url } = verification;
 
-    logger.info({ sessionId: verification.id }, 'Created Veriff verification session');
+    logger.info({ sessionId: verification.id }, '[POST-[shopId]] - Created Veriff verification session');
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -62,18 +62,18 @@ const route = async ({ request, reply, api, logger, connections }) => {
     });
 
     if (error) {
-      logger.error({ error }, "Error sending test verification email");
+      logger.error({ error }, "[POST-[shopId]] - Error sending test verification email");
       return reply.code(500).send({ error: "Failed to send test verification email" });
     }
 
-    logger.info({ emailId: data?.id }, "Test verification email sent successfully");
+    logger.info({ emailId: data?.id }, "[POST-[shopId]] - Test verification email sent successfully");
 
     // Update shop's testVerificationSent field to true
     await api.shopifyShop.update(shopId, {
       testVerificationSent: true,
     });
 
-    logger.info({ shopId }, 'Shop test verification limit reached');
+    logger.info({ shopId }, '[POST-[shopId]] - Shop test verification limit reached');
 
     await api.verification.create({
       sessionId: verification.id,
@@ -92,7 +92,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     });
 
   } catch (error) {
-    logger.error(`Error sending or creating test verification: ${error.message}`, { error });
+    logger.error(`[POST-[shopId]] - Error sending or creating test verification: ${error.message}`, { error });
     
     await reply.code(500).send({
       error: "Failed to send test verification",

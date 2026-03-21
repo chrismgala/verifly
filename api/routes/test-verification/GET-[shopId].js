@@ -16,7 +16,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
   try {
     const shopId = request.params.shopId;
 
-    logger.info({ shopId }, 'Fetching test verification results');
+    logger.info({ shopId }, '[GET-[shopId]] - Fetching test verification results');
 
     // Find the shop by ID
     const shop = await api.shopifyShop.findOne(shopId, {
@@ -83,7 +83,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       }
     }
 
-    logger.info({ shopId, sessionId: internalTestVerification.sessionId }, 'Test verification results retrieved from Veriff');
+    logger.info({ shopId, sessionId: internalTestVerification.sessionId }, '[GET-[shopId]] - Test verification results retrieved from Veriff');
 
     return reply.code(200).send({
       acceptanceTime: internalTestVerification.updatedAt,
@@ -94,7 +94,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
      });
 
   } catch (error) {
-    logger.error(`Error fetching test verification results: ${error.message}`, { error });
+    logger.error(`[GET-[shopId]] - Error fetching test verification results: ${error.message}`, { error });
     
     await reply.code(500).send({
       error: "Failed to fetch test verification results",

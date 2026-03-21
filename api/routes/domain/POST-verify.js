@@ -10,21 +10,21 @@ const route = async ({ request, reply, api, logger, connections }) => {
   try {
     const { domainId } = request.body;
 
-    logger.info({ domainId }, 'Verifying domain in Resend');
+    logger.info({ domainId }, '[POST-verify] - Verifying domain in Resend');
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.domains.verify(domainId);
 
     if (error) {
-      logger.error({ error }, "Error verifying domain in Resend");
+      logger.error({ error }, "[POST-verify] - Error verifying domain in Resend");
       return reply.code(500).send({ error: "Failed to verify domain in Resend" });
     }
 
     await reply.code(200).send();
 
   } catch (error) {
-    logger.error(`Error verifying domain in Resend: ${error.message}`, { error });
+    logger.error(`[POST-verify] - Error verifying domain in Resend: ${error.message}`, { error });
     
     await reply.code(500).send({
       error: "Failed to verify domain in Resend",

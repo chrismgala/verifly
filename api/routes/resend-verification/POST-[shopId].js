@@ -21,7 +21,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
         error: "Verification does not exist", 
         verificationId: verificationId, 
         sessionId: verificationSessionId 
-      }, "Verification does not exist");
+      }, "[POST-[shopId]] - Verification does not exist");
 
       return reply.code(404).send({ error: "Verification does not exist" });
     }
@@ -70,7 +70,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const response = await resend.emails.get(internalVerification.emailId);
 
     if (response.error) {
-      logger.error({ error: response.error }, "Error getting verification email");
+      logger.error({ error: response.error }, "[POST-[shopId]] - Error getting verification email");
       return reply.code(500).send({
         error: "Failed to get verification email"
       });
@@ -86,18 +86,18 @@ const route = async ({ request, reply, api, logger, connections }) => {
     });
 
     if (error) {
-      logger.error({ error }, "Error sending verification email");
+      logger.error({ error }, "[POST-[shopId]] - Error sending verification email");
       return;
     }
 
-    logger.info({ emailId: data?.id }, "Verification email resent successfully");
+    logger.info({ emailId: data?.id }, "[POST-[shopId]] - Verification email resent successfully");
 
     await reply.code(200).send({
       message: "Verification email resent successfully",
     });
 
   } catch (error) {
-    logger.error(`Error resending verification email: ${error.message}`, { error });
+    logger.error(`[POST-[shopId]] - Error resending verification email: ${error.message}`, { error });
     
     await reply.code(500).send({
       error: "Failed to resend verification email",

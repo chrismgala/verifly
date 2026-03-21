@@ -38,14 +38,14 @@ const route = async ({ request, reply, api, logger }) => {
     });
     
     if (variants.length > 0) {
-      logger.info({ shopId }, 'Retrieved variants needing verification');
+      logger.info({ shopId }, '[POST-[shopId]] - Retrieved variants needing verification');
       return reply.code(200).send({ variantIds: variants });
     } else {
-      logger.info({ shopId }, 'No variants needing verification found');
+      logger.info({ shopId }, '[POST-[shopId]] - No variants needing verification found');
       return reply.code(200).send({ variantIds: [] });
     }
   } catch (error) {
-    logger.error({ error, shopId }, 'Failed to fetch variants needing verification');
+    logger.error({ error, shopId }, '[POST-[shopId]] - Failed to fetch variants needing verification');
     return reply.code(500).send({ error: "Failed to fetch variants needing verification" });
   }
 };

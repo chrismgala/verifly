@@ -10,18 +10,18 @@ const route = async ({ request, reply, api, logger, connections }) => {
   try {
     const { domain, shopId } = request.body;
 
-    logger.info({ shopId, domain }, 'Creating custom domain in Resend');
+    logger.info({ shopId, domain }, '[POST-create] - Creating custom domain in Resend');
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.domains.create({ name: domain });
 
     if (error) {
-      logger.error({ error }, "Error creating custom domain in Resend");
+      logger.error({ error }, "[POST-create] - Error creating custom domain in Resend");
       return reply.code(500).send({ error: "Failed to create custom domain in Resend" });
     }
 
-    logger.info({ domain: data?.name }, "Custom domain created successfully");
+    logger.info({ domain: data?.name }, "[POST-create] - Custom domain created successfully");
 
     await api.shopifyShop.update(shopId, {
       domainId: data?.id,
@@ -35,7 +35,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     });
 
   } catch (error) {
-    logger.error(`Error creating custom domain in Resend: ${error.message}`, { error });
+    logger.error(`[POST-create] - Error creating custom domain in Resend: ${error.message}`, { error });
     
     await reply.code(500).send({
       error: "Failed to create custom domain in Resend",

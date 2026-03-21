@@ -10,7 +10,7 @@ import { createUserToken } from "../../../../helpers/util";
 const route = async ({ request, reply, api, logger, connections }) => {
   const { shopId, email } = request.params;
 
-  logger.info({ email }, "Checking verification status");
+  logger.info({ email }, "[GET-[email]] - Checking verification status");
 
   try {
     const customer = await api.shopifyCustomer.maybeFindFirst({
@@ -27,7 +27,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     const userToken = createUserToken(shopId, email);
 
     if (customer) {
-      logger.info({ customerId: customer.id }, "[Proxy] Verification status retrieved");
+      logger.info({ customerId: customer.id }, "[GET-[email]] - Verification status retrieved");
       return reply.code(200).send({ status: customer.status, userToken });
 
     } else {
@@ -39,11 +39,11 @@ const route = async ({ request, reply, api, logger, connections }) => {
         }
       });
 
-      logger.info({ email }, "[Proxy] No customer found, created new customer for post-verification updates");
+      logger.info({ email }, "[GET-[email]] - No customer found, created new customer for post-verification updates");
       return reply.code(200).send({ status: 'unverified', userToken });
     }
   } catch (error) {
-    logger.error({ email, error }, "[Proxy] Error checking verification status");
+    logger.error({ email, error }, "[GET-[email]] - Error checking verification status");
     return reply.code(500).send(error);
   }
 };

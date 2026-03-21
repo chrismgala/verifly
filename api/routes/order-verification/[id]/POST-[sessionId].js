@@ -9,7 +9,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
   const { id, sessionId } = request.params;
   const { override } = request.body;
 
-  logger.debug({ id, sessionId }, "Overriding verification");
+  logger.debug({ id, sessionId }, "[POST-[sessionId]] - Overriding verification");
 
   if (override) {
     // Update verification status internally
@@ -22,7 +22,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
         error, 
         shopId: request.params.id, 
         sessionId: request.params.sessionId 
-      }, "Failed to update verification status");
+      }, "[POST-[sessionId]] - Failed to update verification status");
 
       return reply.code(500).send({ error: "Failed to update verification status" });
     }

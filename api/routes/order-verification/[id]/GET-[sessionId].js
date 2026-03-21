@@ -22,7 +22,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       error: "Verification does not exist", 
       verificationId: id, 
       sessionId: sessionId 
-    }, "Verification does not exist");
+    }, "[GET-[sessionId]] - Verification does not exist");
 
     return reply.code(404).send({ error: "Verification does not exist" });
   }
@@ -48,7 +48,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       }
     }
 
-    logger.info({ shopId: internalVerification.shopId, sessionId: internalVerification.sessionId }, 'Order verification results retrieved from Veriff');
+    logger.info({ shopId: internalVerification.shopId, sessionId: internalVerification.sessionId }, '[GET-[sessionId]] - Order verification results retrieved from Veriff');
 
     return reply.code(200).send({
       person,
@@ -64,7 +64,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
       error, 
       shopId: request.params.id, 
       sessionId: request.params.sessionId 
-    }, "Failed to retrieve verification from Veriff");
+    }, "[GET-[sessionId]] - Failed to retrieve verification from Veriff");
 
     return reply.code(500).send({ error: "Failed to retrieve verification from Veriff" });
   }

@@ -10,14 +10,14 @@ const route = async ({ request, reply, api, logger, connections }) => {
   try {
     const domainId = request.params.domainId;
 
-    logger.info({ domainId }, 'Checking domain status in Resend');
+    logger.info({ domainId }, '[GET-[domainId]] - Checking domain status in Resend');
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.domains.get(domainId);
 
     if (error) {
-      logger.error({ error }, "Error checking domain status in Resend");
+      logger.error({ error }, "[GET-[domainId]] - Error checking domain status in Resend");
       return reply.code(500).send({ error: "Failed to check domain status in Resend" });
     }
 
@@ -27,7 +27,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     });
 
   } catch (error) {
-    logger.error(`Error checking domain status in Resend: ${error.message}`, { error });
+    logger.error(`[GET-[domainId]] - Error checking domain status in Resend: ${error.message}`, { error });
     
     await reply.code(500).send({
       error: "Failed to check domain status in Resend",

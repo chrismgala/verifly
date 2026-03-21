@@ -17,7 +17,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     const shopify = connections.shopify.current;
     if (!shopify) {
-      logger.error({ shopId }, 'Shopify connection not available');
+      logger.error({ shopId }, '[GET-[shopId]] - Shopify connection not available');
       return reply.code(503).send({ error: "Shopify connection unavailable" });
     }
 
@@ -131,7 +131,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
         });
 
       } catch (error) {
-        logger.error({ error, productId: shopifyProduct.id, shopId }, 'Failed to process product');
+        logger.error({ error, productId: shopifyProduct.id, shopId }, '[GET-[shopId]] - Failed to process product');
       }
     }
 
@@ -141,7 +141,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
     return reply.code(200).send({ products: transformedProducts });
 
   } catch (error) {
-    logger.error({ error, shopId }, 'Failed to fetch products');
+    logger.error({ error, shopId }, '[GET-[shopId]] - Failed to fetch products');
     return reply.code(500).send({ error: "Failed to fetch products" });
   }
 };

@@ -18,7 +18,7 @@ const route = async ({ request, reply, api, logger }) => {
         });
         return { id: variantId, success: true, type: 'variant' };
       } catch (error) {
-        logger.error({ error, productId: variantId }, 'Failed to update product variant');
+        logger.error({ error, productId: variantId }, '[POST-[shopId]] - Failed to update product variant');
         return { id: variantId, success: false, error: error.message };
       }
     });
@@ -30,7 +30,7 @@ const route = async ({ request, reply, api, logger }) => {
         });
         return { id: variantId, success: true, type: 'variant' };
       } catch (error) {
-        logger.error({ error, productId: variantId }, 'Failed to update product variant');
+        logger.error({ error, productId: variantId }, '[POST-[shopId]] - Failed to update product variant');
         return { id: variantId, success: false, error: error.message };
       }
     });
@@ -40,7 +40,7 @@ const route = async ({ request, reply, api, logger }) => {
     const failedUpdates = results.filter(result => !result.success);
 
     if (failedUpdates.length > 0) {
-      logger.warn({ failedUpdates, shopId }, 'Some variant updates failed');
+      logger.warn({ failedUpdates, shopId }, '[POST-[shopId]] - Some variant updates failed');
     }
 
     return reply.code(200).send({ 
@@ -49,7 +49,7 @@ const route = async ({ request, reply, api, logger }) => {
     });
 
   } catch (error) {
-    logger.error({ error, shopId }, 'Failed to update product verification settings');
+    logger.error({ error, shopId }, '[POST-[shopId]] - Failed to update product verification settings');
     return reply.code(500).send({ error: "Failed to update product verification settings" });
   }
 };

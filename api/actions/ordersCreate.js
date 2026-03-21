@@ -32,7 +32,7 @@ export const run = async ({ trigger, logger, api }) => {
         customerId: customer?.id,
         topic: trigger.topic,
       },
-      "Received Shopify order creation webhook"
+      "[ordersCreate] - Received Shopify order creation webhook"
     );
 
     try {
@@ -66,7 +66,7 @@ export const run = async ({ trigger, logger, api }) => {
 
         logger.info(
           { newOrUpdatedCustomer },
-          "Upserted new customer record from webhook"
+          "[ordersCreate] - Upserted new customer record from webhook"
         );
       } else {
         await api.shopifyCustomer.update(existingCustomer.id, {
@@ -77,7 +77,7 @@ export const run = async ({ trigger, logger, api }) => {
 
         logger.info(
           { existingCustomer },
-          "Updated existing customer record from webhook"
+          "[ordersCreate] - Updated existing customer record from webhook"
         );
       }
 
@@ -98,7 +98,7 @@ export const run = async ({ trigger, logger, api }) => {
 
       logger.info(
         { orderId, orderName: order.name },
-        "Created new order record from webhook"
+        "[ordersCreate] - Created new order record from webhook"
       );
 
       return newOrder;
@@ -110,7 +110,7 @@ export const run = async ({ trigger, logger, api }) => {
           orderName: trigger.payload.name,
           topic: trigger.topic
         },
-        "Error saving order or customer data from webhook"
+        "[ordersCreate] - Error saving order or customer data from webhook"
       );
       throw error;
     }
@@ -177,13 +177,13 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
         topic: trigger.topic,
         success: true
       },
-      "Order creation action completed successfully"
+      "[ordersCreate] - Order creation action completed successfully"
     );
 
     if (shop?.verificationFlow === 'pre-checkout') {
       logger.info(
         { orderId: order.id, customerEmail },
-        "Abort verification email - verification flow is pre-checkout"
+        "[ordersCreate] - Abort verification email - verification flow is pre-checkout"
       );
       return;
     }
@@ -192,7 +192,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
     if (!customerEmail) {
       logger.warn(
         { orderId: order.id },
-        "Abort verification email - no customer email found"
+        "[ordersCreate] - Abort verification email - no customer email found"
       );
       return;
     }
@@ -200,7 +200,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
     if (customer.status === 'approved') {
       logger.info(
         { orderId: order.id, customerEmail },
-        "Abort verification email - customer is already approved"
+        "[ordersCreate] - Abort verification email - customer is already approved"
       );
       return;
     }
@@ -208,7 +208,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
     if (!shop?.verificationsEnabled) {
       logger.warn(
         { orderId: order.id, shopId },
-        "Abort verification email - verifications are disabled for this shop"
+        "[ordersCreate] - Abort verification email - verifications are disabled for this shop"
       );
       return;
     }
@@ -216,7 +216,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
     if (orderPrice < shop.triggerPrice) {
       logger.warn(
         { orderId: order.id, customerEmail, orderPrice, shopTriggerPrice: shop.triggerPrice },
-        "Abort verification email - order price is below trigger price"
+        "[ordersCreate] - Abort verification email - order price is below trigger price"
       );
       return;
     }
@@ -224,7 +224,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
     if (variantsToVerify.length === 0) {
       logger.warn(
         { orderId: order.id, customerEmail, variantsNeedingVerification, variantIdsFromOrder },
-        'Abort verification email - no variants need verification'
+        '[ordersCreate] - Abort verification email - no variants need verification'
       );
       return;
     }
@@ -253,7 +253,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
         if (result?.tagsAdd?.userErrors?.length) {
           logger.error(
             { userErrors: result.tagsAdd.userErrors, orderId: order.id },
-            '[ordersCreate] Pre-verification tagsAdd userErrors'
+            '[ordersCreate] - Pre-verification tagsAdd userErrors'
           );
           throw new Error(result.tagsAdd.userErrors[0].message);
         }
@@ -278,7 +278,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
         }
       });
 
-      logger.info({ customer, order }, "Created new verification record");
+      logger.info({ customer, order }, "[ordersCreate] - Created new verification record");
 
       const veriffVerification = await createVerificationSession({
         verification: {
@@ -306,7 +306,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
         const { data: domainData, error: domainError } = await resend.domains.get(shop.domainId);
 
         if (domainError) {
-          logger.error({ domainError }, "Error checking domain status in Resend");
+          logger.error({ domainError }, "[ordersCreate] - Error checking domain status in Resend");
         } else {
           domainIsVerified = domainData?.status === 'verified';
 
@@ -333,11 +333,11 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
       });
 
       if (error) {
-        logger.error({ error }, "Error sending verification email");
+        logger.error({ error }, "[ordersCreate] - Error sending verification email");
         return;
       }
 
-      logger.info({ emailId: data?.id }, "Verification email sent successfully");
+      logger.info({ emailId: data?.id }, "[ordersCreate] - Verification email sent successfully");
 
       await api.verification.update(internalVerification.id, {
         emailId: data?.id
@@ -351,7 +351,7 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
           orderName: order.name,
           topic: trigger.topic
         },
-        "Error creating verification or sending email"
+        "[ordersCreate] - Error creating verification or sending email"
       );
       throw error;
     }
