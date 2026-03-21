@@ -58,6 +58,8 @@ export const SettingsPage = () => {
   const [verificationsEnabled, setVerificationsEnabled] = useState(shop?.verificationsEnabled);
   const [triggerPrice, setTriggerPrice] = useState(shop?.triggerPrice);
   const [verificationFlow, setVerificationFlow] = useState(shop?.verificationFlow || 'post-checkout');
+  const [enforceShippingAddressMatch, setEnforceShippingAddressMatch] = useState(shop?.enforceShippingAddressMatch);
+  const [preVerificationOrderTag, setPreVerificationOrderTag] = useState(shop?.preVerificationOrderTag || '');
   const [logo, setLogo] = useState(shop?.logo);
   const [primaryColor, setPrimaryColor] = useState(shop?.primaryColor || '#FF6B35');
   const [secondaryColor, setSecondaryColor] = useState(shop?.secondaryColor || '#2196F3');
@@ -115,7 +117,7 @@ export const SettingsPage = () => {
 
   useEffect(() => {
     shopify.saveBar.show('my-save-bar');
-  }, [verificationsEnabled, triggerPrice, verificationFlow, logo, primaryColor, secondaryColor, emailDomain]);
+  }, [verificationsEnabled, triggerPrice, verificationFlow, enforceShippingAddressMatch, preVerificationOrderTag, logo, primaryColor, secondaryColor, emailDomain]);
 
   useEffect(() => {
     if (data || domainData) {
@@ -171,6 +173,8 @@ export const SettingsPage = () => {
       verificationsEnabled,
       triggerPrice: parseFloat(triggerPrice),
       verificationFlow,
+      enforceShippingAddressMatch,
+      preVerificationOrderTag,
       ...(logo && !logo?.url && { logo: { file: logo } }),
       primaryColor,
       secondaryColor,
@@ -334,6 +338,50 @@ export const SettingsPage = () => {
                   options={options}
                   onChange={handleSelectChange}
                   value={verificationFlow}
+                />
+              </Grid.Cell>
+            </Grid>
+
+            <Grid>
+              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
+                <Text as='h3' variant='headingMd'>
+                  Shipping & Document Address
+                </Text>
+                <Text as='p' variant='bodyMd'>
+                  When enabled, Verifly will enforce the shipping address on the order to match the address shown on the customer's ID.
+                </Text>
+              </Grid.Cell>
+
+              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
+                <div style={{ textAlign: 'right' }}>
+                  <Knob
+                    disabled={!isTrialActivated}
+                    selected={enforceShippingAddressMatch}
+                    ariaLabel='Require shipping address match'
+                    onClick={() => setEnforceShippingAddressMatch((prev) => !prev)}
+                  />
+                </div>
+              </Grid.Cell>
+            </Grid>
+
+            <Grid>
+              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
+                <Text as='h3' variant='headingMd'>
+                  Pre-Verification Tagging
+                </Text>
+                <Text as='p' variant='bodyMd'>
+                  Add a custom Shopify order tag that should be applied before the verification process is completed.
+                </Text>
+              </Grid.Cell>
+
+              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
+                <TextField
+                  type="text"
+                  value={preVerificationOrderTag}
+                  onChange={setPreVerificationOrderTag}
+                  autoComplete="off"
+                  disabled={!isTrialActivated}
+                  placeholder="Verifly Hold Fulfillment"
                 />
               </Grid.Cell>
             </Grid>

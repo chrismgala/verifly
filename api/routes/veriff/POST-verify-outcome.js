@@ -3,6 +3,21 @@ import { RouteHandler } from "gadget-server";
 import { isSignatureValid } from '../../helpers/veriff';
 
 /**
+ * Helper function to return a new object where every value
+ * in the input object is upper-cased (if it is a string).
+ * @param {Object} obj
+ * @returns {Object}
+ */
+function upperCaseAddressComponents(obj = {}) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [
+      key,
+      typeof value === "string" ? value.toUpperCase() : value,
+    ])
+  );
+}
+
+/**
  * Route handler for Veriff webhook
  *
  * @type { RouteHandler } route handler - see: https://docs.gadget.dev/guides/http-routes/route-configuration#route-context
@@ -63,6 +78,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
         }
       }
     });
+
     order = await api.shopifyOrder.findById(internalVerification.orderId);
 
     try {
@@ -97,7 +113,53 @@ const route = async ({ request, reply, api, logger, connections }) => {
         throw new Error("[Veriff - Verify Outcome] Missing Shopify connection");
       }
 
-      const result = await shopify.graphql(
+      const shop = await api.shopifyShop.findById(shopId);
+      let tags = ["Verifly Verified"];
+
+      if (shop?.enforceShippingAddressMatch) {
+        const shippingAddress = upperCaseAddressComponents(order?.shippingAddress); // Gadget doesn't uppercase
+        const documentAddress = upperCaseAddressComponents(verification?.person?.address?.components); // In case Veriff doesn't uppercase in the future
+
+        const shippingAndDocumentAddressesMatch =
+          `${documentAddress?.houseNumber} ${documentAddress?.road}` === shippingAddress?.address1 &&
+          documentAddress?.unit === shippingAddress?.address2 &&
+          documentAddress?.city === shippingAddress?.city &&
+          documentAddress?.state === shippingAddress?.province_code &&
+          documentAddress?.postcode === shippingAddress?.zip;
+
+        if (!shippingAndDocumentAddressesMatch) {
+          tags = ["Verifly Address Mismatch"];
+        }
+      }
+
+      if (shop?.preVerificationOrderTag && shop?.preVerificationOrderTag.length > 0) {
+        const removeResult = await shopify.graphql(
+          `mutation ($id: ID!, $tags: [String!]!) {
+            tagsRemove(id: $id, tags: $tags) {
+              node {
+                id
+              }
+              userErrors {
+                message
+              }
+            }
+          }`,
+          {
+            id: `gid://shopify/Order/${order.id}`,
+            tags: [shop.preVerificationOrderTag]
+          }
+        );
+
+        if (removeResult?.tagsRemove?.userErrors?.length) {
+          logger.error(
+            { userErrors: removeResult.tagsRemove.userErrors, orderId: order.id },
+            '[Veriff - Verify Outcome] tagsRemove userErrors'
+          );
+          throw new Error(removeResult.tagsRemove.userErrors[0].message);
+        }
+      }
+
+      const addResult = await shopify.graphql(
         `mutation ($id: ID!, $tags: [String!]!) {
           tagsAdd(id: $id, tags: $tags) {
             node {
@@ -110,11 +172,19 @@ const route = async ({ request, reply, api, logger, connections }) => {
         }`,
         {
           id: `gid://shopify/Order/${order.id}`,
-          tags: ["Verifly Verified"]
+          tags: tags
         }
       );
 
-      logger.info({ result }, '[Veriff - Verify Outcome] Order tags updated successfully');
+      if (addResult?.tagsAdd?.userErrors?.length) {
+        logger.error(
+          { userErrors: addResult.tagsAdd.userErrors, orderId: order.id },
+          '[Veriff - Verify Outcome] tagsAdd userErrors'
+        );
+        throw new Error(addResult.tagsAdd.userErrors[0].message);
+      }
+
+      logger.info({ addResult }, '[Veriff - Verify Outcome] Order tags updated successfully');
 
     } catch (error) {
       logger.error({ error, orderId: order.id }, '[Veriff - Verify Outcome] Order tags update failed');

@@ -38,6 +38,11 @@ export const schema: GadgetModel = {
       storageKey:
         "ModelField-DataModel-Shopify-Shop-enabled_presentment_currencies::FieldStorageEpoch-DataModel-Shopify-Shop-enabled_presentment_currencies-initial",
     },
+    enforceShippingAddressMatch: {
+      type: "boolean",
+      default: false,
+      storageKey: "zUU2Ee0YZ8RX",
+    },
     forceSsl: {
       type: "boolean",
       storageKey:
@@ -55,6 +60,10 @@ export const schema: GadgetModel = {
       sourceFile:
         "api/models/shopifyShop/monthlyVerificationCount.gelly",
       storageKey: "NnyUm2yxxy5b",
+    },
+    preVerificationOrderTag: {
+      type: "string",
+      storageKey: "WTyNZQVEg_Ie",
     },
     primaryColor: { type: "string", storageKey: "q9YeG4llwzHw" },
     secondaryColor: { type: "string", storageKey: "JNAuni7ucFIc" },

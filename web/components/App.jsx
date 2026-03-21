@@ -126,6 +126,8 @@ function EmbeddedApp() {
       testVerificationSent: true,
       triggerPrice: true,
       verificationFlow: true,
+      enforceShippingAddressMatch: true,
+      preVerificationOrderTag: true,
       logo: { 
         url: true
       },

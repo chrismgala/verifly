@@ -118,7 +118,7 @@ export const run = async ({ trigger, logger, api }) => {
 };
 
 /** @type { ActionOnSuccess } */
-export const onSuccess = async ({ trigger, logger, api }) => {
+export const onSuccess = async ({ trigger, logger, api, connections }) => {
   const isShopifyTrigger = trigger?.type === "shopify_webhook";
 
   if (isShopifyTrigger) {
@@ -230,6 +230,37 @@ export const onSuccess = async ({ trigger, logger, api }) => {
     }
 
     try {
+      if (shop?.preVerificationOrderTag && shop?.preVerificationOrderTag.length > 0) {
+        const shopify = await connections.shopify.forShopId(shopId);
+        
+        const result = await shopify.graphql(
+          `mutation ($id: ID!, $tags: [String!]!) {
+            tagsAdd(id: $id, tags: $tags) {
+              node {
+                id
+              }
+              userErrors {
+                message
+              }
+            }
+          }`,
+          {
+            id: `gid://shopify/Order/${order.id}`,
+            tags: [shop.preVerificationOrderTag]
+          }
+        );
+
+        if (result?.tagsAdd?.userErrors?.length) {
+          logger.error(
+            { userErrors: result.tagsAdd.userErrors, orderId: order.id },
+            '[ordersCreate] Pre-verification tagsAdd userErrors'
+          );
+          throw new Error(result.tagsAdd.userErrors[0].message);
+        }
+
+        logger.info({ result }, '[ordersCreate] - Pre-verification order tag added');
+      }
+
       // Send verification email
       const resend = new Resend(process.env.RESEND_API_KEY);
 
