@@ -12,19 +12,24 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
     logger.info({ domainId }, '[GET-[domainId]] - Checking domain status in Resend');
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
+    if (domainId) {
+      const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const { data, error } = await resend.domains.get(domainId);
+      const { data, error } = await resend.domains.get(domainId);
 
-    if (error) {
-      logger.error({ error }, "[GET-[domainId]] - Error checking domain status in Resend");
-      return reply.code(500).send({ error: "Failed to check domain status in Resend" });
+      if (error) {
+        logger.error({ error }, "[GET-[domainId]] - Error checking domain status in Resend");
+        return reply.code(500).send({ error: "Failed to check domain status in Resend" });
+      }
+
+      await reply.code(200).send({
+        status: data?.status,
+        records: data?.records,
+      });
+    } else {
+      logger.error({ domainId }, "[GET-[domainId]] - No domain ID provided");
+      return reply.code(400).send({ error: "No domain ID provided" });
     }
-
-    await reply.code(200).send({
-      status: data?.status,
-      records: data?.records,
-    });
 
   } catch (error) {
     logger.error(`[GET-[domainId]] - Error checking domain status in Resend: ${error.message}`, { error });
