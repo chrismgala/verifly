@@ -7,7 +7,7 @@ application_url = "https://verifly--development.gadget.app/api/shopify/install-o
 embedded = true
 
 [webhooks]
-api_version = "2025-01"
+api_version = "2026-01"
 
 [auth]
 redirect_urls = [

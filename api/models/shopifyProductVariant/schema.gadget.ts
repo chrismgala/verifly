@@ -16,6 +16,7 @@ export const schema: GadgetModel = {
   },
   shopify: {
     fields: [
+      "availableForSale",
       "barcode",
       "compareAtPrice",
       "inventoryPolicy",

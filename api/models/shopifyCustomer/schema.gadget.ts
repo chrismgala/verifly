@@ -7,6 +7,16 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v1",
   storageKey: "DataModel-Shopify-Customer",
   fields: {
+    metafield: {
+      type: "json",
+      storageKey:
+        "ModelField-DataModel-Shopify-Customer-metafield::FieldStorageEpoch-DataModel-Shopify-Customer-metafield-initial",
+    },
+    ordersCount: {
+      type: "number",
+      storageKey:
+        "ModelField-DataModel-Shopify-Customer-orders_count::FieldStorageEpoch-DataModel-Shopify-Customer-orders_count-initial",
+    },
     platformCustomerId: {
       type: "number",
       validations: { unique: true },
@@ -27,6 +37,16 @@ export const schema: GadgetModel = {
       ],
       storageKey: "rAcTYIHE6Eim",
     },
+    taxExemptionsBackup: {
+      type: "json",
+      storageKey:
+        "ModelField-DataModel-Shopify-Customer-tax_exemptions::FieldStorageEpoch-DataModel-Shopify-Customer-tax_exemptions-initial",
+    },
+    totalSpent: {
+      type: "string",
+      storageKey:
+        "ModelField-DataModel-Shopify-Customer-total_spent::FieldStorageEpoch-DataModel-Shopify-Customer-total_spent-initial",
+    },
     verification: {
       type: "hasOne",
       child: { model: "verification", belongsToField: "customer" },
@@ -37,24 +57,30 @@ export const schema: GadgetModel = {
     fields: [
       "acceptsMarketing",
       "acceptsMarketingUpdatedAt",
+      "amountSpent",
+      "canDelete",
       "checkouts",
       "currency",
       "dataSaleOptOut",
+      "displayName",
       "email",
       "emailMarketingConsent",
       "firstName",
+      "hasTimelineComment",
       "lastName",
       "lastOrder",
       "lastOrderName",
+      "legacyResourceId",
+      "lifetimeDuration",
       "locale",
       "marketingOptInLevel",
-      "metafield",
       "multipassIdentifier",
       "note",
+      "numberOfOrders",
       "orders",
-      "ordersCount",
       "paymentMethods",
       "phone",
+      "productSubscriberStatus",
       "shop",
       "shopifyCreatedAt",
       "shopifyState",
@@ -64,7 +90,8 @@ export const schema: GadgetModel = {
       "tags",
       "taxExempt",
       "taxExemptions",
-      "totalSpent",
+      "unsubscribeUrl",
+      "validEmailAddress",
       "verifiedEmail",
     ],
   },

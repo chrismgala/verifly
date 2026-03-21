@@ -6,7 +6,13 @@ import type { GadgetModel } from "gadget-server";
 export const schema: GadgetModel = {
   type: "gadget/model-schema/v1",
   storageKey: "DataModel-Shopify-Checkout",
-  fields: {},
+  fields: {
+    shippingLine: {
+      type: "json",
+      storageKey:
+        "ModelField-DataModel-Shopify-Checkout-shipping_line::FieldStorageEpoch-DataModel-Shopify-Checkout-shipping_line-initial",
+    },
+  },
   shopify: {
     fields: [
       "abandonedCheckoutUrl",
@@ -37,7 +43,7 @@ export const schema: GadgetModel = {
       "requiresShipping",
       "reservationTime",
       "reservationTimeLeft",
-      "shippingLine",
+      "shippingLines",
       "shippingPolicyUrl",
       "shop",
       "shopifyCreatedAt",

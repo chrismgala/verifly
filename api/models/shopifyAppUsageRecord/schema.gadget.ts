@@ -11,6 +11,7 @@ export const schema: GadgetModel = {
     fields: [
       "appSubscription",
       "description",
+      "idempotencyKey",
       "price",
       "shop",
       "shopifyCreatedAt",
