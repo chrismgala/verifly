@@ -359,6 +359,9 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
 };
 
 export const options = {
+  // This webhook handler can perform multiple external network calls:
+  // Veriff session creation + Resend domain/email operations + optional Shopify tag mutation.
+  timeoutMS: 45000,
   triggers: {
     shopify: { webhooks: ["orders/create"] },
   },

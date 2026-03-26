@@ -100,6 +100,10 @@ export const run = async ({ params, trigger, logger, api, connections }) => {
 };
 
 export const options = {
+  // This action performs at least one external Shopify Admin GraphQL call.
+  // Keep the timeout high enough for occasional rate-limit/latency spikes, but
+  // not so high that failures take a very long time to surface.
+  timeoutMS: 30000,
   triggers: {
     api: true
   },

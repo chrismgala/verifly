@@ -71,6 +71,8 @@ export const run = async ({ params, trigger, logger, api, connections }) => {
 };
 
 export const options = {
+  // Calls Shopify's Billing Admin API via GraphQL.
+  timeoutMS: 20000,
   triggers: {
     api: true
   },

@@ -20,6 +20,9 @@ export const run = async ({ params, logger, api, connections }) => {
 
 /** @type { ActionOptions } */
 export const options = {
+  // globalShopifySync may paginate and make multiple Shopify API calls.
+  // Give it enough headroom for daily sync work.
+  timeoutMS: 300000,
   triggers: {
     scheduler: [
       {

@@ -26,7 +26,7 @@ export const trialCalculations = (
   const usedMinutes =
     differenceInMinutes(
       today,
-      usedTrialMinutesUpdatedAt ? new Date(usedTrialMinutesUpdatedAt) : today
+      usedTrialMinutesUpdatedAt ? usedTrialMinutesUpdatedAt : today
     ) + usedTrialMinutes;
 
   return {

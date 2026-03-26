@@ -31,3 +31,9 @@ export const params = {
     additionalProperties: true,
   },
 };
+
+export const options = {
+  // This action executes `shopify.graphql(...)`, which is an external network call.
+  // Keep this bounded to avoid stuck background jobs in edge cases.
+  timeoutMS: 30000,
+};
