@@ -4,10 +4,16 @@ import type { GadgetModel } from "gadget-server";
 // For more information on how to update this file http://docs.gadget.dev
 
 export const schema: GadgetModel = {
-  type: "gadget/model-schema/v1",
+  type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-Domain",
   fields: {},
   shopify: {
-    fields: ["host", "localization", "shop", "sslEnabled", "url"],
+    fields: {
+      host: true,
+      localization: true,
+      shop: true,
+      sslEnabled: true,
+      url: true,
+    },
   },
 };

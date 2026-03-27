@@ -4,7 +4,7 @@ import type { GadgetModel } from "gadget-server";
 // For more information on how to update this file http://docs.gadget.dev
 
 export const schema: GadgetModel = {
-  type: "gadget/model-schema/v1",
+  type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-ProductVariant",
   fields: {
     needsVerification: {
@@ -15,27 +15,27 @@ export const schema: GadgetModel = {
     },
   },
   shopify: {
-    fields: [
-      "availableForSale",
-      "barcode",
-      "compareAtPrice",
-      "inventoryPolicy",
-      "inventoryQuantity",
-      "option1",
-      "option2",
-      "option3",
-      "position",
-      "presentmentPrices",
-      "price",
-      "product",
-      "selectedOptions",
-      "shop",
-      "shopifyCreatedAt",
-      "shopifyUpdatedAt",
-      "sku",
-      "taxCode",
-      "taxable",
-      "title",
-    ],
+    fields: {
+      availableForSale: true,
+      barcode: true,
+      compareAtPrice: true,
+      inventoryPolicy: true,
+      inventoryQuantity: true,
+      option1: true,
+      option2: true,
+      option3: true,
+      position: true,
+      presentmentPrices: true,
+      price: true,
+      product: true,
+      selectedOptions: true,
+      shop: true,
+      shopifyCreatedAt: true,
+      shopifyUpdatedAt: true,
+      sku: true,
+      taxCode: true,
+      taxable: true,
+      title: true,
+    },
   },
 };

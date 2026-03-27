@@ -4,16 +4,17 @@ import type { GadgetModel } from "gadget-server";
 // For more information on how to update this file http://docs.gadget.dev
 
 export const schema: GadgetModel = {
-  type: "gadget/model-schema/v1",
+  type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-CustomerPaymentMethod",
   fields: {},
   shopify: {
-    fields: [
-      "customer",
-      "instrument",
-      "revokedAt",
-      "revokedReason",
-      "shop",
-    ],
+    fields: {
+      adminGraphqlApiId: true,
+      customer: true,
+      instrument: true,
+      revokedAt: true,
+      revokedReason: true,
+      shop: true,
+    },
   },
 };

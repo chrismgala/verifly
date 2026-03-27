@@ -4,23 +4,24 @@ import type { GadgetModel } from "gadget-server";
 // For more information on how to update this file http://docs.gadget.dev
 
 export const schema: GadgetModel = {
-  type: "gadget/model-schema/v1",
+  type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-FulfillmentService",
   fields: {},
   shopify: {
-    fields: [
-      "callbackUrl",
-      "format",
-      "fulfillmentOrdersOptIn",
-      "handle",
-      "inventoryManagement",
-      "name",
-      "permitsSkuSharing",
-      "requiresShippingMethod",
-      "serviceName",
-      "shop",
-      "trackingSupport",
-      "type",
-    ],
+    fields: {
+      adminGraphqlApiId: true,
+      callbackUrl: true,
+      format: true,
+      fulfillmentOrdersOptIn: true,
+      handle: true,
+      inventoryManagement: true,
+      name: true,
+      permitsSkuSharing: true,
+      requiresShippingMethod: true,
+      serviceName: true,
+      shop: true,
+      trackingSupport: true,
+      type: true,
+    },
   },
 };
