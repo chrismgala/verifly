@@ -197,10 +197,10 @@ export const onSuccess = async ({ trigger, logger, api, connections }) => {
       return;
     }
 
-    if (customer.status === 'approved') {
+    if (customer.status === 'approved' && !shop?.verifyRepeatCustomers) {
       logger.info(
         { orderId: order.id, customerEmail },
-        "[ordersCreate] - Abort verification email - customer is already approved"
+        "[ordersCreate] - Abort verification email - customer is already approved and repeat customers do not need to be verified"
       );
       return;
     }

@@ -59,6 +59,7 @@ export const SettingsPage = () => {
   const [triggerPrice, setTriggerPrice] = useState(shop?.triggerPrice);
   const [verificationFlow, setVerificationFlow] = useState(shop?.verificationFlow || 'post-checkout');
   const [enforceShippingAddressMatch, setEnforceShippingAddressMatch] = useState(shop?.enforceShippingAddressMatch);
+  const [verifyRepeatCustomers, setVerifyRepeatCustomers] = useState(shop?.verifyRepeatCustomers || false);
   const [preVerificationOrderTag, setPreVerificationOrderTag] = useState(shop?.preVerificationOrderTag || '');
   const [logo, setLogo] = useState(shop?.logo);
   const [primaryColor, setPrimaryColor] = useState(shop?.primaryColor || '#FF6B35');
@@ -117,7 +118,7 @@ export const SettingsPage = () => {
 
   useEffect(() => {
     shopify.saveBar.show('my-save-bar');
-  }, [verificationsEnabled, triggerPrice, verificationFlow, enforceShippingAddressMatch, preVerificationOrderTag, logo, primaryColor, secondaryColor, emailDomain]);
+  }, [verificationsEnabled, triggerPrice, verificationFlow, enforceShippingAddressMatch, verifyRepeatCustomers, preVerificationOrderTag, logo, primaryColor, secondaryColor, emailDomain]);
 
   useEffect(() => {
     if (data || domainData) {
@@ -174,6 +175,7 @@ export const SettingsPage = () => {
       triggerPrice: parseFloat(triggerPrice),
       verificationFlow,
       enforceShippingAddressMatch,
+      verifyRepeatCustomers,
       preVerificationOrderTag,
       ...(logo && !logo?.url && { logo: { file: logo } }),
       primaryColor,
@@ -296,6 +298,50 @@ export const SettingsPage = () => {
             <Grid>
               <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
                 <Text as='h3' variant='headingMd'>
+                  Shipping & Document Address
+                </Text>
+                <Text as='p' variant='bodyMd'>
+                  When enabled, Verifly will enforce the shipping address on the order to match the address shown on the customer's ID.
+                </Text>
+              </Grid.Cell>
+
+              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
+                <div style={{ textAlign: 'right' }}>
+                  <Knob
+                    disabled={!isTrialActivated}
+                    selected={enforceShippingAddressMatch}
+                    ariaLabel='Require shipping address match'
+                    onClick={() => setEnforceShippingAddressMatch((prev) => !prev)}
+                  />
+                </div>
+              </Grid.Cell>
+            </Grid>
+
+            <Grid>
+              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
+                <Text as='h3' variant='headingMd'>
+                  Verify Repeat Customers
+                </Text>
+                <Text as='p' variant='bodyMd'>
+                  When enabled, repeat customers will still be asked to verify their ID.
+                </Text>
+              </Grid.Cell>
+
+              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
+                <div style={{ textAlign: 'right' }}>
+                  <Knob
+                    disabled={!isTrialActivated}
+                    selected={verifyRepeatCustomers}
+                    ariaLabel='Verify repeat customers'
+                    onClick={() => setVerifyRepeatCustomers((prev) => !prev)}
+                  />
+                </div>
+              </Grid.Cell>
+            </Grid>
+
+            <Grid>
+              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
+                <Text as='h3' variant='headingMd'>
                   Trigger Price
                 </Text>
                 
@@ -339,28 +385,6 @@ export const SettingsPage = () => {
                   onChange={handleSelectChange}
                   value={verificationFlow}
                 />
-              </Grid.Cell>
-            </Grid>
-
-            <Grid>
-              <Grid.Cell columnSpan={{xs: 9, sm: 9, md: 9, lg: 9, xl: 9}}>
-                <Text as='h3' variant='headingMd'>
-                  Shipping & Document Address
-                </Text>
-                <Text as='p' variant='bodyMd'>
-                  When enabled, Verifly will enforce the shipping address on the order to match the address shown on the customer's ID.
-                </Text>
-              </Grid.Cell>
-
-              <Grid.Cell columnSpan={{xs: 3, sm: 3, md: 3, lg: 3, xl: 3}}>
-                <div style={{ textAlign: 'right' }}>
-                  <Knob
-                    disabled={!isTrialActivated}
-                    selected={enforceShippingAddressMatch}
-                    ariaLabel='Require shipping address match'
-                    onClick={() => setEnforceShippingAddressMatch((prev) => !prev)}
-                  />
-                </div>
               </Grid.Cell>
             </Grid>
 

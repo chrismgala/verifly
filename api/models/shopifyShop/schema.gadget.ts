@@ -121,6 +121,11 @@ export const schema: GadgetModel = {
       parent: { model: "plan" },
       storageKey: "iDt0-KmUNGCo",
     },
+    verifyRepeatCustomers: {
+      type: "boolean",
+      default: false,
+      storageKey: "eGQQaPTEyrCS",
+    },
     weightUnitBackup: {
       type: "string",
       storageKey:
