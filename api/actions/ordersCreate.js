@@ -9,7 +9,7 @@ import { createVerificationSession } from '../helpers/veriff';
 export const run = async ({ trigger, logger, api }) => {
   // access order payload attributes at trigger.payload.id
   // access the topic at trigger.topic
-  const isShopifyTrigger = trigger.type === "shopify_webhook";
+  const isShopifyTrigger = trigger.type === "shopify_webhook" || trigger.type === "shopify_webhook_reconciliation";
 
   const order = trigger.payload;
 
