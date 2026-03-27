@@ -181,7 +181,7 @@ export const permissions: GadgetPermissions = {
         verification: {
           read: {
             filter:
-              "api/models/shopifyShop/monthlyVerificationCount.gelly",
+              "accessControl/filters/verification/verification.gelly",
           },
         },
       },

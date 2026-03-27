@@ -6,3 +6,5 @@
 .idea/
 .gadget/
 node_modules/
+extensions/*/dist
+extensions/*/node_modules

@@ -2,25 +2,26 @@
 
 client_id = "af8427785fcbb0cf772c0e9a03085a7f"
 name = "verifly-development"
-handle = "verifly-development"
 application_url = "https://verifly--development.gadget.app/api/shopify/install-or-render"
 embedded = true
+handle = "verifly-development"
 
 [webhooks]
 api_version = "2026-01"
+
+  [[webhooks.subscriptions]]
+  uri = "https://verifly--development.gadget.app/api/webhooks/shopify"
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
 
 [auth]
 redirect_urls = [
   "https://verifly--development.gadget.app/api/connections/auth/shopify/callback"
 ]
 
-[pos]
-embedded = false
-
 [app_proxy]
-url = "https://verifly--development.gadget.app/proxy/"
+url = "https://verifly--development.gadget.app/proxy"
 subpath = "proxy"
 prefix = "apps"
 
-[build]
-include_config_on_deploy = false
+[pos]
+embedded = false
