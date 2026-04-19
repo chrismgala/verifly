@@ -100,7 +100,6 @@ function Extension() {
           label: normalizeCamelCase(key),
           value: person[key].value,
           confidence: CONFIDENCE_LEVEL_MAP[person[key].confidenceCategory] || "-",
-          sources: person[key].sources?.join(", ") || "-",
         });
       }
     }
@@ -123,7 +122,6 @@ function Extension() {
               ? normalizeDocumentType(document[key].value)
               : document[key].value,
           confidence: CONFIDENCE_LEVEL_MAP[document[key].confidenceCategory] || "-",
-          sources: document[key].sources?.join(", ") || "-",
         });
       }
     }
@@ -132,98 +130,98 @@ function Extension() {
     return rows;
   }, [verificationPayload?.document]);
 
-  const insightsRows = useMemo(() => {
-    const insights = verificationPayload?.insights;
-    if (!insights) return [];
-
-    const rows = insights.map((insight) => ({
-      category: capitalizeString(insight.category),
-      detail:
-        INSIGHTS_MAP?.[insight.category]?.[insight.label] || normalizeCamelCase(insight.label),
-      result: insight.result === "yes" ? "✅ Pass" : "❌ Fail",
-    }));
-
-    rows.sort((a, b) => a.category.localeCompare(b.category));
-    return rows;
-  }, [verificationPayload?.insights]);
-
   return (
-    <s-admin-block heading="Verifly Verification">
-      <s-stack direction="block" gap="base">
-        <s-stack direction="inline" gap="small-100">
-          <s-text>Verification status:</s-text>
-          <s-badge tone={isVerified ? "success" : "warning"}>
-            {displayVerificationLabel(currentStatus)}
-          </s-badge>
-        </s-stack>
+    <s-admin-block heading="ID Verification">
+      {isLoading && <s-spinner />}
 
-        {verificationPayload?.acceptanceTime && (
-          <s-text>
-            Completion date: {new Date(verificationPayload.acceptanceTime).toString()}
-          </s-text>
-        )}
+      {!isLoading && errorMessage && (
+        <s-banner tone="critical">{errorMessage}</s-banner>
+      )}
 
-        {isLoading && <s-spinner />}
-
-        {!isLoading && errorMessage && (
-          <s-banner tone="critical">{errorMessage}</s-banner>
-        )}
-
-        {!isLoading && !errorMessage && (
-          <s-stack direction="block">
-            <s-divider />
-            <s-heading>Personal Information</s-heading>
-            {personalInfoRows.length === 0 && (
-              <s-text>No personal information returned.</s-text>
+      
+      {!isLoading && !errorMessage && (
+        <s-stack direction="block" gap="base">
+          <s-grid gridTemplateColumns="repeat(12, 1fr)" gap="base" justifyContent="space-between">
+            {verificationPayload?.internalVerification?.status && (
+              <s-grid-item gridColumn="span 4" gridRow="span 1">
+                <s-stack direction="inline" gap="small-300">
+                  <s-heading>Status:</s-heading>
+                  <s-badge tone={isVerified ? "success" : "warning"}>
+                    {displayVerificationLabel(currentStatus)}
+                  </s-badge>
+                </s-stack>
+              </s-grid-item>
             )}
-            {personalInfoRows.map((row) => (
-              <s-box key={`person-${row.label}`}>
-                <s-text>
-                  {row.label}: {row.value}
-                </s-text>
-                <s-text tone="neutral">
-                  Confidence {row.confidence} • Sources: {row.sources}
-                </s-text>
-              </s-box>
-            ))}
-
-            <s-divider />
-            <s-heading>Document Information</s-heading>
-            {documentInfoRows.length === 0 && (
-              <s-text>No document information returned.</s-text>
-            )}
-            {documentInfoRows.map((row) => (
-              <s-box key={`document-${row.label}`}>
-                <s-text>
-                  {row.label}: {row.value}
-                </s-text>
-                <s-text tone="neutral">
-                  Confidence {row.confidence} • Sources: {row.sources}
-                </s-text>
-              </s-box>
-            ))}
-
-            <s-divider />
-            <s-heading>Verification Insights</s-heading>
+            
             {verificationPayload?.decisionScore != null && (
-              <s-text>
-                Decision score: {Math.round(Number(verificationPayload.decisionScore) * 100)} / 100
-              </s-text>
+              <s-grid-item gridColumn="span 4" gridRow="span 1">
+                <s-stack direction="inline" gap="small-300">
+                  <s-heading>Confidence:</s-heading>
+                  <s-text>
+                    {Math.round(Number(verificationPayload.decisionScore) * 100)} / 100
+                  </s-text>
+                </s-stack>
+              </s-grid-item>
             )}
-            {insightsRows.length === 0 && (
-              <s-text>No insights returned.</s-text>
-            )}
-            {insightsRows.map((row, idx) => (
-              <s-box key={`insight-${idx}`}>
-                <s-text>
-                  {row.category}: {row.result}
-                </s-text>
-                <s-text tone="neutral">{row.detail}</s-text>
-              </s-box>
-            ))}
 
-            <s-divider />
-            <s-heading>Verification Images</s-heading>
+            {verificationPayload?.acceptanceTime && (
+              <s-grid-item gridColumn="span 4" gridRow="span 1">
+                <s-stack direction="inline" gap="small-300">
+                  <s-heading>Date:</s-heading>
+                  <s-text>
+                    {new Date(verificationPayload.acceptanceTime).toLocaleString()}
+                  </s-text>
+                </s-stack>
+              </s-grid-item>
+            )}
+          </s-grid>
+
+          <s-stack direction="block" gap="small-300">
+            <s-heading>Personal Information</s-heading>
+            {personalInfoRows.length === 0 ? (
+              <s-text>No personal information returned.</s-text>
+            ) : (
+              <s-table>
+                <s-table-header-row>
+                  <s-table-header>Field</s-table-header>
+                  <s-table-header>Value</s-table-header>
+                  <s-table-header>Confidence</s-table-header>
+                </s-table-header-row>
+                <s-table-body>
+                  {personalInfoRows.map((row) => (
+                    <s-table-row key={`person-${row.label}`}>
+                      <s-table-cell>{row.label}</s-table-cell>
+                      <s-table-cell>{row.value}</s-table-cell>
+                      <s-table-cell>{row.confidence}</s-table-cell>
+                    </s-table-row>
+                  ))}
+                </s-table-body>
+              </s-table>
+            )}
+
+            <s-heading>Document Information</s-heading>
+            {documentInfoRows.length === 0 ? (
+              <s-text>No document information returned.</s-text>
+            ) : (
+              <s-table>
+                <s-table-header-row>
+                  <s-table-header>Field</s-table-header>
+                  <s-table-header>Value</s-table-header>
+                  <s-table-header>Confidence</s-table-header>
+                </s-table-header-row>
+                <s-table-body>
+                  {documentInfoRows.map((row) => (
+                    <s-table-row key={`document-${row.label}`}>
+                      <s-table-cell>{row.label}</s-table-cell>
+                      <s-table-cell>{row.value}</s-table-cell>
+                      <s-table-cell>{row.confidence}</s-table-cell>
+                    </s-table-row>
+                  ))}
+                </s-table-body>
+              </s-table>
+            )}
+
+            <s-heading>Images</s-heading>
             {!verificationPayload?.rawImages?.length && (
               <s-text>No images returned.</s-text>
             )}
@@ -235,50 +233,11 @@ function Extension() {
               />
             ))}
           </s-stack>
-        )}
-      </s-stack>
+        </s-stack>
+      )}
     </s-admin-block>
   );
 }
-
-const INSIGHTS_MAP = {
-  document: {
-    documentAccepted:
-      "The presented document is accepted in the integration and the session can proceed with further validation checks.",
-    documentFrontImageAvailable:
-      "The image of the front of the document is present and can be used for the verification.",
-    documentFrontFullyVisible: "The image of front of the document fully visible.",
-    documentBackImageAvailable:
-      "The image of the back of the document is present and can be used for the verification.",
-    documentBackFullyVisible: "The image of back of the document fully visible.",
-    documentImageQualitySufficient:
-      "The document image meets the image quality requirements for verification.",
-    validDocumentAppearance:
-      "The presented document's appearance corresponds with how a valid document should appear.",
-    physicalDocumentPresent:
-      "The presented document is real and exists in the physical original form.",
-    documentRecognised:
-      "The presented identity document has successfully been recognized and the session can proceed with futher validation checks.",
-    documentNotExpired:
-      "The presented document has not expired and can be used for verification.",
-  },
-  biometric: {
-    faceSimilarToPortrait: "The face in selfie matches the face in the document photo.",
-    faceNotInBlocklist: "The face from the selfie is not on a face blocklist.",
-    faceLiveness:
-      "The selfie is of a real face that is physically present during the verification session.",
-    faceImageAvailable:
-      "The face image from the selfie is available for verification and can proceed with the face related checks.",
-    faceImageQualitySufficient:
-      "The face image from the selfie meets the image quality requirements for verification.",
-  },
-  fraud: {
-    allowedIpLocation:
-      "The user's device IP address is not from a restricted area and is therefore accepted.",
-    expectedTrafficBehaviour:
-      "The user and session behavior do not appear to be suspicious or as being part of a repetitive pattern related to fraud.",
-  },
-};
 
 const CONFIDENCE_LEVEL_MAP = {
   high: "🟢",

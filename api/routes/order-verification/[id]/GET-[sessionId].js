@@ -70,4 +70,11 @@ const route = async ({ request, reply, api, logger, connections }) => {
   }
 }
 
+route.options = {
+  cors: {
+    origin: ["https://extensions.shopifycdn.com"]
+  },
+  methods: ["GET", "OPTIONS"]
+}
+
 export default route;
