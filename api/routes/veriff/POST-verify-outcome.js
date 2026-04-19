@@ -122,7 +122,7 @@ const route = async ({ request, reply, api, logger, connections }) => {
 
         const shippingAndDocumentAddressesMatch =
           `${documentAddress?.houseNumber} ${documentAddress?.road}` === shippingAddress?.address1 &&
-          documentAddress?.unit === shippingAddress?.address2 &&
+          (documentAddress?.unit ? documentAddress.unit === shippingAddress?.address2 : true) &&
           documentAddress?.city === shippingAddress?.city &&
           documentAddress?.state === shippingAddress?.province_code &&
           documentAddress?.postcode === shippingAddress?.zip;
