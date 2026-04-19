@@ -7,5 +7,11 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-CompanyContactRoleAssignment",
   fields: {},
-  shopify: { fields: { company: true, shop: true } },
+  searchIndex: false,
+  shopify: {
+    fields: {
+      company: { searchIndex: false },
+      shop: { searchIndex: false },
+    },
+  },
 };

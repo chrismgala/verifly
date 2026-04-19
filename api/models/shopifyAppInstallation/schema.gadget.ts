@@ -7,13 +7,14 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-AppInstallation",
   fields: {},
+  searchIndex: false,
   shopify: {
     fields: {
-      accessScopes: true,
-      app: true,
-      launchUrl: true,
-      shop: true,
-      uninstallUrl: true,
+      accessScopes: { filterIndex: false, searchIndex: false },
+      app: { searchIndex: false },
+      launchUrl: { filterIndex: false, searchIndex: false },
+      shop: { searchIndex: false },
+      uninstallUrl: { filterIndex: false, searchIndex: false },
     },
   },
 };

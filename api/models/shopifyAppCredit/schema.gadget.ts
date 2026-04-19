@@ -7,13 +7,14 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-AppCredit",
   fields: {},
+  searchIndex: false,
   shopify: {
     fields: {
-      amount: true,
-      description: true,
-      shop: true,
-      shopifyCreatedAt: true,
-      test: true,
+      amount: { filterIndex: false, searchIndex: false },
+      description: { filterIndex: false, searchIndex: false },
+      shop: { searchIndex: false },
+      shopifyCreatedAt: { filterIndex: false, searchIndex: false },
+      test: { filterIndex: false, searchIndex: false },
     },
   },
 };

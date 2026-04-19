@@ -7,13 +7,14 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-Domain",
   fields: {},
+  searchIndex: false,
   shopify: {
     fields: {
-      host: true,
-      localization: true,
-      shop: true,
-      sslEnabled: true,
-      url: true,
+      host: { filterIndex: false, searchIndex: false },
+      localization: { filterIndex: false, searchIndex: false },
+      shop: { searchIndex: false },
+      sslEnabled: { filterIndex: false, searchIndex: false },
+      url: { filterIndex: false, searchIndex: false },
     },
   },
 };

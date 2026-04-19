@@ -11,8 +11,15 @@ export const schema: GadgetModel = {
       type: "boolean",
       default: false,
       storageKey: "-VFmryEFfX57",
+      filterIndex: false,
+      searchIndex: false,
     },
-    description: { type: "string", storageKey: "jqD1-EpZkL0R" },
+    description: {
+      type: "string",
+      storageKey: "jqD1-EpZkL0R",
+      filterIndex: false,
+      searchIndex: false,
+    },
     features: {
       type: "enum",
       default: [],
@@ -40,9 +47,21 @@ export const schema: GadgetModel = {
         "Gov watchlist screening (+$0.70 / check)",
       ],
       storageKey: "XZPSpWyO7XtP",
+      filterIndex: false,
+      searchIndex: false,
     },
-    name: { type: "string", storageKey: "2eoNueMSatWX" },
-    price: { type: "number", storageKey: "9dYli2Qm6FDl" },
+    name: {
+      type: "string",
+      storageKey: "2eoNueMSatWX",
+      filterIndex: false,
+      searchIndex: false,
+    },
+    price: {
+      type: "number",
+      storageKey: "9dYli2Qm6FDl",
+      filterIndex: false,
+      searchIndex: false,
+    },
     shop: {
       type: "hasMany",
       children: {
@@ -51,12 +70,25 @@ export const schema: GadgetModel = {
       },
       storageKey: "RVcnBlFui_av",
     },
-    usageCap: { type: "number", storageKey: "TlqfUa1C5iJR" },
+    usageCap: {
+      type: "number",
+      storageKey: "TlqfUa1C5iJR",
+      filterIndex: false,
+      searchIndex: false,
+    },
     usagePrice: {
       type: "number",
       decimals: 2,
       storageKey: "XfDuJg1kuMIg",
+      filterIndex: false,
+      searchIndex: false,
     },
-    visible: { type: "boolean", storageKey: "W-zMYknOTRKt" },
+    visible: {
+      type: "boolean",
+      storageKey: "W-zMYknOTRKt",
+      filterIndex: false,
+      searchIndex: false,
+    },
   },
+  searchIndex: false,
 };

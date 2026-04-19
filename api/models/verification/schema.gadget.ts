@@ -12,14 +12,22 @@ export const schema: GadgetModel = {
       parent: { model: "shopifyCustomer" },
       storageKey: "qlVm8Ee60dbO",
     },
-    emailId: { type: "string", storageKey: "cxsFNXOYHL0W" },
+    emailId: {
+      type: "string",
+      storageKey: "cxsFNXOYHL0W",
+      filterIndex: false,
+    },
     order: {
       type: "belongsTo",
       validations: { unique: true },
       parent: { model: "shopifyOrder" },
       storageKey: "5g1Hq0gVbBTB",
     },
-    sessionId: { type: "string", storageKey: "5JG9ky9DfdNl" },
+    sessionId: {
+      type: "string",
+      storageKey: "5JG9ky9DfdNl",
+      filterIndex: false,
+    },
     shop: {
       type: "belongsTo",
       parent: { model: "shopifyShop" },
@@ -38,6 +46,7 @@ export const schema: GadgetModel = {
         "abandoned",
       ],
       storageKey: "gO6__aZR9xf_",
+      filterIndex: false,
     },
     test: {
       type: "boolean",

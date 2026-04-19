@@ -7,14 +7,15 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-AppPurchaseOneTime",
   fields: {},
+  searchIndex: false,
   shopify: {
     fields: {
-      name: true,
-      price: true,
-      shop: true,
-      shopifyCreatedAt: true,
-      status: true,
-      test: true,
+      name: { filterIndex: false, searchIndex: false },
+      price: { filterIndex: false, searchIndex: false },
+      shop: { searchIndex: false },
+      shopifyCreatedAt: { filterIndex: false, searchIndex: false },
+      status: { filterIndex: false, searchIndex: false },
+      test: { filterIndex: false, searchIndex: false },
     },
   },
 };

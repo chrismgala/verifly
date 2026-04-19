@@ -7,15 +7,16 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-BusinessEntity",
   fields: {},
+  searchIndex: false,
   shopify: {
     fields: {
-      address: true,
-      adminGraphqlApiId: true,
-      companyName: true,
-      displayName: true,
+      address: { filterIndex: false, searchIndex: false },
+      adminGraphqlApiId: { searchIndex: false },
+      companyName: { filterIndex: false, searchIndex: false },
+      displayName: { filterIndex: false, searchIndex: false },
       orders: true,
-      primary: true,
-      shop: true,
+      primary: { filterIndex: false, searchIndex: false },
+      shop: { searchIndex: false },
     },
   },
 };

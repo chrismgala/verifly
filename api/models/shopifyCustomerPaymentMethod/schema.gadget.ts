@@ -7,14 +7,15 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-CustomerPaymentMethod",
   fields: {},
+  searchIndex: false,
   shopify: {
     fields: {
-      adminGraphqlApiId: true,
-      customer: true,
-      instrument: true,
-      revokedAt: true,
-      revokedReason: true,
-      shop: true,
+      adminGraphqlApiId: { searchIndex: false },
+      customer: { searchIndex: false },
+      instrument: { filterIndex: false, searchIndex: false },
+      revokedAt: { filterIndex: false, searchIndex: false },
+      revokedReason: { filterIndex: false, searchIndex: false },
+      shop: { searchIndex: false },
     },
   },
 };

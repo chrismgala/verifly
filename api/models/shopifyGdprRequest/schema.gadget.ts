@@ -7,4 +7,5 @@ export const schema: GadgetModel = {
   type: "gadget/model-schema/v2",
   storageKey: "DataModel-Shopify-GdprRequest",
   fields: {},
+  searchIndex: false,
 };
